@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEET 360 Tracker</title>
+  <meta name="theme-color" content="#090d16" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NEET 360" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%236366f1'/%3E%3Cstop offset='50%25' stop-color='%23a855f7'/%3E%3Cstop offset='100%25' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='62' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='white' text-anchor='middle'%3E360%3C/text%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background-color: #090d16;
+      color: #f1f5f9;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-20 md:bottom-5 right-0 md:right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 md:px-0"></div>
+
+  <!-- Confirmation / Chapter Completion Prompt Modal -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center gap-2.5 mb-2">
+        <span id="confirmModalBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">All Topics Completed!</span>
+        <h3 id="confirmModalTitle" class="text-lg font-bold text-white">Move Chapter to Completed?</h3>
+      </div>
+      <p id="confirmModalMessage" class="text-sm text-slate-300 mb-6 leading-relaxed"></p>
+      <div class="flex items-center justify-end gap-3">
+        <button id="confirmCancelBtn" type="button" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition">Keep in Active Bucket</button>
+        <button id="confirmAcceptBtn" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/25 transition">Yes, Move to Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top App Bar (Mobile-Optimized + Desktop Navigation) -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-[#090d16]/95 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-extrabold text-white text-sm sm:text-base tracking-tighter shrink-0">
+          360
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">NEET 360 Tracker</h1>
+            <span id="memorySyncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+              💾 Saved
+            </span>
+          </div>
+          <p id="topSubheader" class="hidden sm:block text-xs text-slate-400 truncate">Mock Priority &rarr; Current &rarr; Backlog • Topic-Wise 6h Engine • 71 NMC Chapters</p>
+        </div>
+      </div>
+
+      <!-- Desktop Nav (Hidden on Mobile; Mobile uses sticky bottom bar) -->
+      <div class="hidden md:flex items-center gap-2">
+        <button id="navDashboardBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs lg:text-sm font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 transition">
+          3-Day Forecast
+        </button>
+        <button id="navControlCenterBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs lg:text-sm font-medium bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700/70 transition flex items-center gap-1.5">
+          <span>Syllabus Control Center</span>
+          <span id="navActiveBucketsPill" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300">0 Active</span>
+        </button>
+        <button id="navArchiveBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs lg:text-sm font-medium bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700/70 transition flex items-center gap-1.5">
+          <span>Completed Archive</span>
+          <span id="navCompletedCountPill" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">0</span>
+        </button>
+        <button id="navWizardBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs lg:text-sm font-medium bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700/70 transition">
+          Settings &amp; Backup
+        </button>
+      </div>
+
+      <!-- Mobile Quick Active Pill -->
+      <div class="flex md:hidden items-center gap-1.5 shrink-0">
+        <span id="mobileActivePill" class="px-2 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0 Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Sticky Bottom Navigation Bar -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#0b1120]/95 backdrop-blur-lg border-t border-slate-800 safe-bottom">
+    <div class="grid grid-cols-4 h-16 px-1">
+      <button id="mobNavDashboardBtn" type="button" class="flex flex-col items-center justify-center gap-0.5 text-indigo-400 font-bold text-[11px] transition">
+        <span class="text-base leading-none">📅</span>
+        <span>Forecast</span>
+      </button>
+      <button id="mobNavControlCenterBtn" type="button" class="flex flex-col items-center justify-center gap-0.5 text-slate-400 font-medium text-[11px] transition">
+        <span class="text-base leading-none">📚</span>
+        <span>Syllabus</span>
+      </button>
+      <button id="mobNavArchiveBtn" type="button" class="flex flex-col items-center justify-center gap-0.5 text-slate-400 font-medium text-[11px] transition relative">
+        <span class="text-base leading-none">🏆</span>
+        <span>Archive <span id="mobCompletedCountPill" class="text-[10px] text-emerald-400 font-bold">(0)</span></span>
+      </button>
+      <button id="mobNavWizardBtn" type="button" class="flex flex-col items-center justify-center gap-0.5 text-slate-400 font-medium text-[11px] transition">
+        <span class="text-base leading-none">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 space-y-6 sm:space-y-8">
+
+    <!-- ==================== VIEW 1: SETTINGS, DEFAULT MOCK CYCLE & PACING ==================== -->
+    <section id="wizardView" class="hidden space-y-6">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 mb-2">
+              NMC 6-Hour Topic Assembly &amp; Smart Mock Cycle Settings
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Configure Default Mock Test Cycle, Dates &amp; DPP Pacing</h2>
+            <p class="text-sm text-slate-400 mt-1">
+              The 6-Hour Assembly Engine pulls uncompleted topics one by one (<code class="text-indigo-300">topic.duration_mins + 30 mins DPP</code>). Once <strong class="text-emerald-300">Today</strong> hits your <code class="text-emerald-300">daily_study_limit</code> (starts at 360 mins / 6 hours), remaining topics automatically cascade into <strong class="text-purple-300">Tomorrow</strong> and <strong class="text-sky-300">Day 3</strong>.
+            </p>
+          </div>
+          <button id="goToControlCenterFromWizBtn" type="button" class="self-start md:self-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 transition">
+            Open Syllabus Control Center &rarr;
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Column 1: Smart Mock Test Cycle & Date Management -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-base font-bold text-white">1. Smart Mock Test Cycle &amp; Dates</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Configure your recurring mock cycle (defaults to every 14 days on Sunday) and prep dates.</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="mockCycleIntervalInput" class="block text-xs font-semibold uppercase tracking-wider text-rose-300 mb-1">Mock Cycle</label>
+                  <select id="mockCycleIntervalInput" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-rose-500">
+                    <option value="2">1-Day Gap (Every 2 Days)</option>
+                    <option value="3">2-Day Gap (Every 3 Days)</option>
+                    <option value="7">Every 7 Days (Weekly)</option>
+                    <option value="14" selected>Every 14 Days (Default)</option>
+                    <option value="21">Every 21 Days</option>
+                    <option value="28">Every 28 Days</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="mockCycleWeekdaySelect" class="block text-xs font-semibold uppercase tracking-wider text-rose-300 mb-1">Mock Day</label>
+                  <select id="mockCycleWeekdaySelect" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-rose-500">
+                    <option value="any">Any Day (For 1-Day Gap)</option>
+                    <option value="0" selected>Sunday (Default)</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Global Occasion / Festival Postpone Override -->
+              <div class="p-3 rounded-xl bg-amber-950/25 border border-amber-500/30 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <label for="globalMockOverrideDateInput" class="text-[11px] font-bold uppercase tracking-wider text-amber-300">Postponed / Occasion Override</label>
+                  <button id="clearGlobalMockOverrideBtn" type="button" class="text-[11px] font-semibold text-slate-400 hover:text-white underline">Clear</button>
+                </div>
+                <input id="globalMockOverrideDateInput" type="date" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/40 text-white text-xs sm:text-sm focus:outline-none focus:border-amber-400" />
+                <p class="text-[11px] text-slate-400 leading-snug">If a festival/occasion postpones the next mock test, pick the new date here. Auto-resumes your regular cycle after that date.</p>
+              </div>
+
+              <!-- Auto-Switch to 1-Day Gap After 3-4 Months -->
+              <div class="p-3 rounded-xl bg-indigo-950/25 border border-indigo-500/30 space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input id="autoSprint1DayGapCheckbox" type="checkbox" checked class="w-4 h-4 rounded border-slate-600 text-indigo-600 focus:ring-indigo-500" />
+                  <span class="text-xs font-bold text-indigo-200">Auto-switch to 1-Day Gap (Every 2d) in Final Phase</span>
+                </label>
+                <div class="flex items-center justify-between gap-2">
+                  <label for="sprintStartDateInput" class="text-[11px] text-slate-400 shrink-0">Switch Date (~3.5 mos):</label>
+                  <input id="sprintStartDateInput" type="date" class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="prepStartDateInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Prep Start</label>
+                  <input id="prepStartDateInput" type="date" class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500" />
+                </div>
+                <div>
+                  <label for="targetDateInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Target Date</label>
+                  <input id="targetDateInput" type="date" class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500" />
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-rose-950/30 border border-rose-500/30 space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-300">Next Auto-Assigned Mock Date:</span>
+                <strong id="wizNextMockDatePreview" class="text-rose-300 font-bold">--</strong>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Prep Day #<span id="wizPrepDayCount" class="text-white font-semibold">1</span></span>
+                <span id="wizDaysAvailableDisplay" class="text-emerald-400 font-bold">-- days to target</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: 6-Hour Topic Assembly & Progressive Overload -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-base font-bold text-white">2. Topic Assembly &amp; Overload</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Each scheduled topic adds its <code class="text-indigo-300">duration_mins</code> (adjusted by playback speed) plus the associated DPP practice time (default <strong class="text-emerald-300">30 mins</strong>).</p>
+              </div>
+
+              <div>
+                <label for="lectureSpeedSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">One-Shot Playback Speed</label>
+                <select id="lectureSpeedSelect" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500">
+                  <option value="1" selected>1x (Exact Topic duration_mins)</option>
+                  <option value="1.25">1.25x (Saves 20% Topic Video Time)</option>
+                  <option value="1.5">1.5x (Saves 33% Topic Video Time)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="dppTimePerTopicInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Estimated DPP Time per Topic (mins)</label>
+                <input id="dppTimePerTopicInput" type="number" min="15" max="90" step="5" value="30" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Current Adaptive Capacity:</span>
+                <strong id="wizPreviewAdaptiveCap" class="text-emerald-400">6 Hours (360 mins)</strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Consistency Streak:</span>
+                <strong id="wizPreviewStreak" class="text-amber-300">0 Days (+30m every 3 days)</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Subject-Level Dream Team Defaults -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-5 space-y-4">
+            <div>
+              <h3 class="text-base font-bold text-white">3. Build Your Dream Team</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Assign your preferred Physics Wallah faculty per subject.</p>
+            </div>
+            <div id="subjectDefaultTeachersContainer" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="exportBackupBtn" type="button" class="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition">
+              ⬇ Export Backup (.json)
+            </button>
+            <label class="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 transition cursor-pointer">
+              ⬆ Restore Backup
+              <input id="importBackupInput" type="file" accept=".json,application/json" class="hidden" />
+            </label>
+            <button id="resetAllBtn" type="button" class="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 border border-rose-500/30 transition">
+              Reset All Data
+            </button>
+          </div>
+          <button id="saveOnboardingBtn" type="button" class="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/30 transition">
+            Save Settings &amp; Rebuild 3-Day Forecast
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: THE 3-DAY FORECAST DASHBOARD ==================== -->
+    <section id="dashboardView" class="space-y-6">
+      <!-- Top Metrics: Adaptive Capacity, Consistency Streak, Default Mock Cycle & Master Progress Bar -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="currentDateBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                Sunday, Nov 15, 2026
+              </span>
+              <span id="nextMockCycleBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                🚨 Default Mock Cycle: Every 14d (Sun)
+              </span>
+              <span id="prepStartBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/25">
+                Prep Start: Day 1
+              </span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Topic-Wise 3-Day Forecast Command Center</h2>
+            <p class="text-xs sm:text-sm text-slate-400">
+              Pulls individual topics one by one (<strong class="text-rose-300">Mock Priority</strong> &rarr; <strong class="text-indigo-300">Current</strong> &rarr; <strong class="text-amber-300">Backlog</strong>), adding <code class="text-indigo-300">topic.duration_mins + 30m DPP</code> until Today hits your <strong id="heroLimitText" class="text-emerald-300">360 mins (6 Hours)</strong> limit, then cascades remaining topics into <strong>Tomorrow</strong> and <strong>Day 3</strong>!
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button id="logStreakDayBtn" type="button" class="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5" title="Complete 100% of Today's topics to advance your Consistency Streak (+30m capacity every 3 days)">
+              <span>🔥 Log 100% Today (+Streak)</span>
+            </button>
+            <button id="movePendingBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition flex items-center gap-2">
+              <span>Move Pending to Tomorrow</span>
+              <span id="pendingCountPill" class="px-2 py-0.5 rounded-full text-[11px] bg-slate-950/25 text-slate-950 font-extrabold">0</span>
+            </button>
+            <button id="quickOpenControlCenterBtn" type="button" class="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition">
+              ⚙️ Syllabus Control Center
+            </button>
+          </div>
+        </div>
+
+        <!-- 5-Bucket Status Bar Summary -->
+        <div id="dashboardBucketSummaryBar" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1"></div>
+
+        <!-- KPI Stat Cards: Progressive Overload (Daily Capacity + Consistency Streak) & 3-Day Forecast Metrics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <!-- Card 1: Daily Capacity (Progressive Overload) -->
+          <div class="bg-gradient-to-br from-emerald-950/50 via-slate-950 to-slate-950 border border-emerald-500/40 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-300">Daily Capacity</span>
+              <span id="overloadLevelBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Base 6.0h Limit</span>
+            </div>
+            <div id="dailyCapacityValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">6h 00m (360m)</div>
+            <div id="capacityUsedSub" class="text-xs text-emerald-300 mt-1">Today: 0m / 360m max</div>
+          </div>
+
+          <!-- Card 2: Consistency Streak Tracker -->
+          <div class="bg-gradient-to-br from-amber-950/50 via-slate-950 to-slate-950 border border-amber-500/40 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-300">Consistency Streak</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">+30m / 3 Days</span>
+            </div>
+            <div id="consistencyStreakValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">🔥 0 Days</div>
+            <div id="nextOverloadSub" class="text-xs text-amber-200 mt-1">3 more 100% days to unlock 6.5h capacity</div>
+          </div>
+
+          <!-- Card 3: Today's Targeted DPP MCQs -->
+          <div class="bg-gradient-to-br from-indigo-950/60 via-slate-950 to-slate-950 border border-indigo-500/40 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300">Today's DPP Target</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">+30m DPP / Topic</span>
+            </div>
+            <div id="todayMcqTargetValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0 MCQs</div>
+            <div id="todayMcqCompletedSub" class="text-xs text-indigo-300 mt-1">0 MCQs solved today</div>
+          </div>
+
+          <!-- Card 4: 3-Day Horizon & Completed Archive -->
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-slate-400">3-Day Horizon &amp; Archive</span>
+              <span id="deferredQueuePill" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Day 4+ Queue: 0</span>
+            </div>
+            <div id="overallSyllabusValue" class="text-xl sm:text-2xl font-extrabold text-purple-400 mt-1">0 / 71 Completed</div>
+            <div id="threeDaySummarySub" class="text-xs text-slate-400 mt-1">Today: -- • Tom: -- • Day 3: --</div>
+          </div>
+        </div>
+
+        <!-- Master Progress Bar (Today's Execution) -->
+        <div class="space-y-2 pt-1">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+            <span class="font-bold text-slate-200">Today's Topic Mastery Progress Bar (Check Off Topics as You Complete Lecture + DPPs!)</span>
+            <span id="liveProgressLabel" class="font-bold text-indigo-400">0% (0 / 0 mins • 0 / 0 DPP MCQs completed)</span>
+          </div>
+          <div class="w-full h-4 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
+            <div id="liveProgressBar" class="h-full rounded-full bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto-Rescheduler & Overflow Report Banner (Hidden until triggered) -->
+      <div id="rescheduleBanner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-0.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-300">Dynamic Rescheduler &amp; 3-Day Capacity Cascade Report</div>
+          <p id="rescheduleBannerText" class="text-xs sm:text-sm text-slate-200 leading-relaxed"></p>
+        </div>
+        <button id="dismissRescheduleBannerBtn" type="button" class="self-start sm:self-center px-3 py-1 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 transition shrink-0">
+          Dismiss
+        </button>
+      </div>
+
+      <!-- Empty Active Buckets Onboarding Callout (Shown when all 68 chapters are Unstarted) -->
+      <div id="noActiveChaptersCallout" class="hidden bg-gradient-to-r from-indigo-950/70 via-slate-900 to-slate-900 border border-indigo-500/40 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              All 71 Rationalised NMC Chapters Default to "Unstarted"
+            </span>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Activate Chapters in the Syllabus Control Center or Load the Sample!</h3>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+              Open the <strong>Syllabus Control Center</strong> to move chapters into <strong class="text-rose-300">Mock Priority</strong>, <strong class="text-indigo-300">Current</strong>, or <strong class="text-amber-300">Backlog</strong>—or click <strong>⚡ Load NMC Coaching Sample</strong> to see individual topic task cards (e.g., <em>"Physics: Kinematics - Projectile Motion &amp; Circular Motion Basics (90 mins)"</em>) assembled across Today, Tomorrow, and Day 3!
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button id="calloutOpenControlCenterBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition">
+              Open Syllabus Control Center
+            </button>
+            <button id="loadStarterSampleBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+              ⚡ Load NMC Coaching Sample
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== THE 3-DAY FORECAST (3-COLUMN + FOCUSED DAY TABS) ==================== -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-lg sm:text-xl font-extrabold text-white">📅 The 3-Day Topic Forecast (Today • Tomorrow • Day 3)</h3>
+            <p class="text-xs text-slate-400">
+              Each topic card includes its One-Shot segment (<code class="text-indigo-300">duration_mins</code>) + <code class="text-emerald-300">30 mins DPP</code>. The moment a day hits <strong id="forecastHeaderCapLabel" class="text-emerald-300">360 mins (6.0 Hours)</strong>, remaining topics automatically push to the next day.
+            </p>
+          </div>
+          <!-- Layout Mode Toggle: 3-Column Grid vs Focused Single-Day Tabs -->
+          <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 self-start sm:self-center">
+            <button id="viewModeColumnsBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">
+              3-Column View
+            </button>
+            <button id="viewModeTabsBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition">
+              Focused Day Tabs
+            </button>
+          </div>
+        </div>
+
+        <!-- Day Tab Bar (Visible when Focused Day Tabs mode is active) -->
+        <div id="forecastDayTabsBar" class="hidden flex-wrap items-center gap-2">
+          <button type="button" data-day-tab="0" class="forecast-day-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 text-white transition">
+            Day 1: Today
+          </button>
+          <button type="button" data-day-tab="1" class="forecast-day-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            Day 2: Tomorrow
+          </button>
+          <button type="button" data-day-tab="2" class="forecast-day-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            Day 3: Day After Tomorrow
+          </button>
+        </div>
+
+        <!-- 3-Column Forecast Container -->
+        <div id="threeDayForecastGrid" class="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start"></div>
+      </div>
+
+      <!-- Inline Completed Chapters Archive Preview on Dashboard -->
+      <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl overflow-hidden shadow-xl">
+        <div class="px-5 py-4 bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-xl text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              🏆 ARCHIVE
+            </span>
+            <div>
+              <h4 class="text-base sm:text-lg font-extrabold text-white">Completed Chapters Archive</h4>
+              <p class="text-xs text-slate-300">Chapters moved to <strong class="text-emerald-300">Completed</strong> once all of their individual topics are checked off.</p>
+            </div>
+          </div>
+          <button id="openFullArchiveBtn" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition">
+            View Full Archive Tab &rarr;
+          </button>
+        </div>
+        <div id="dashboardCompletedArchiveList" class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: THE SYLLABUS CONTROL CENTER ==================== -->
+    <section id="controlCenterView" class="hidden space-y-6">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 mb-2">
+              5-Bucket Switcher • Auto 14-Day Sunday Mock Deadline + Override Picker
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Syllabus Control Center (71 NMC Chapters &amp; Topic Checklist)</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              Change any chapter between <strong class="text-slate-300">Unstarted</strong>, <strong class="text-indigo-300">Current</strong>, <strong class="text-rose-300">Mock Priority</strong> (auto-assigns <strong id="ccDefaultCycleLabel" class="text-rose-300">14-Day Sunday Mock Date</strong> with an inline <strong>Override Date</strong> calendar picker), <strong class="text-amber-300">Backlog</strong>, and <strong class="text-emerald-300">Completed</strong>.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="ccResetAllToUnstartedBtn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              Set All 71 to Unstarted
+            </button>
+            <button id="ccReturnToDashboardBtn" type="button" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition">
+              View 3-Day Forecast &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Bucket Filter Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="ccSearchInput" type="text" placeholder="Search chapter, topic, or teacher..." class="px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-64" />
+            <select id="ccBucketFilter" class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="ALL">All 5 Status Buckets (71)</option>
+              <option value="Mock Priority">🚨 Mock Priority</option>
+              <option value="Current">📘 Current</option>
+              <option value="Backlog">🛠️ Backlog</option>
+              <option value="Unstarted">⏸️ Unstarted (Default)</option>
+              <option value="Completed">✅ Completed</option>
+            </select>
+          </div>
+          <div id="ccBucketCountBadges" class="flex flex-wrap items-center gap-2 text-xs"></div>
+        </div>
+
+        <!-- Subject-Grouped Columns (Physics, Chemistry, Botany, Zoology) -->
+        <div id="controlCenterSubjectsContainer" class="space-y-8"></div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: COMPLETED CHAPTERS ARCHIVE ==================== -->
+    <section id="archiveView" class="hidden space-y-6">
+      <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 mb-2">
+              🏆 Mastered NEET Vault
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Completed Chapters Archive</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Every chapter where all topics have <code class="text-emerald-300">completed: true</code> and you confirm completion moves here.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="archiveTotalMasteredBadge" class="px-4 py-2 rounded-xl text-sm font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              0 / 71 Chapters Mastered (0%)
+            </span>
+          </div>
+        </div>
+
+        <div id="fullArchiveGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ============================================================================
+    // STEP 1: THE RATIONALISED NMC NEET SYLLABUS DATABASE (`const neetSyllabus`)
+    // Exact schema requested:
+    // - id, subject ("Physics" | "Chemistry" | "Botany" | "Zoology"), chapter, status ("Unstarted" | "Current" | "Mock Priority" | "Backlog" | "Completed")
+    // - topics: [{ name, duration_mins, completed: false }]
+    // - dpp_mcqs_per_topic
+    // ============================================================================
+    const neetSyllabus = [
+      // --- PHYSICS ---
+      {
+        id: "phy_01", subject: "Physics", chapter: "Physics and Measurement", status: "Unstarted",
+        topics: [
+          { name: "Units, Dimensions & Dimensional Analysis", duration_mins: 60, completed: false },
+          { name: "Errors in Measurement & Significant Figures", duration_mins: 45, completed: false },
+          { name: "Vernier Callipers & Screw Gauge (Experimental)", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "phy_02", subject: "Physics", chapter: "Kinematics", status: "Unstarted",
+        topics: [
+          { name: "Distance, Displacement & Uniform Motion", duration_mins: 60, completed: false },
+          { name: "Calculus in Kinematics & Relative Velocity 1D", duration_mins: 75, completed: false },
+          { name: "Projectile Motion & Relative Velocity 2D", duration_mins: 90, completed: false },
+          { name: "Uniform Circular Motion", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "phy_03", subject: "Physics", chapter: "Laws of Motion", status: "Unstarted",
+        topics: [
+          { name: "Newton's Laws & Conservation of Momentum", duration_mins: 60, completed: false },
+          { name: "Equilibrium of Forces & Friction", duration_mins: 90, completed: false },
+          { name: "Dynamics of Circular Motion & Banking of Roads", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_04", subject: "Physics", chapter: "Work, Energy and Power", status: "Unstarted",
+        topics: [
+          { name: "Work Done by Constant & Variable Force", duration_mins: 60, completed: false },
+          { name: "Kinetic & Potential Energy, Work-Energy Theorem", duration_mins: 75, completed: false },
+          { name: "Power & Collisions (1D and 2D)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_05", subject: "Physics", chapter: "Rotational Motion", status: "Unstarted",
+        topics: [
+          { name: "Center of Mass & Motion of COM", duration_mins: 60, completed: false },
+          { name: "Vector Product, Torque & Angular Momentum", duration_mins: 75, completed: false },
+          { name: "Moment of Inertia & Theorems", duration_mins: 75, completed: false },
+          { name: "Rolling Motion & Conservation of Angular Momentum", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "phy_06", subject: "Physics", chapter: "Gravitation", status: "Unstarted",
+        topics: [
+          { name: "Universal Law of Gravitation & 'g' Variation", duration_mins: 60, completed: false },
+          { name: "Gravitational Potential & Energy", duration_mins: 60, completed: false },
+          { name: "Kepler's Laws, Satellites & Escape Velocity", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "phy_07", subject: "Physics", chapter: "Properties of Solids and Liquids", status: "Unstarted",
+        topics: [
+          { name: "Elasticity, Stress-Strain Curve & Hooke's Law", duration_mins: 45, completed: false },
+          { name: "Fluid Pressure, Pascal's & Archimedes' Principle", duration_mins: 60, completed: false },
+          { name: "Fluid Dynamics (Bernoulli's & Viscosity)", duration_mins: 75, completed: false },
+          { name: "Surface Tension, Drops & Bubbles", duration_mins: 60, completed: false },
+          { name: "Thermal Expansion & Heat Transfer", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_08", subject: "Physics", chapter: "Thermodynamics", status: "Unstarted",
+        topics: [
+          { name: "Zeroth & First Law of Thermodynamics", duration_mins: 60, completed: false },
+          { name: "Thermodynamic Processes & Work Done", duration_mins: 75, completed: false },
+          { name: "Second Law, Heat Engines & Refrigerators", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_09", subject: "Physics", chapter: "Kinetic Theory of Gases", status: "Unstarted",
+        topics: [
+          { name: "Ideal Gas Equation & Gas Laws", duration_mins: 45, completed: false },
+          { name: "Postulates of KTG & Pressure of Gas", duration_mins: 45, completed: false },
+          { name: "Degrees of Freedom & Equipartition of Energy", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "phy_10", subject: "Physics", chapter: "Oscillations and Waves", status: "Unstarted",
+        topics: [
+          { name: "SHM Equations, Velocity & Acceleration", duration_mins: 60, completed: false },
+          { name: "Energy in SHM, Pendulums & Springs", duration_mins: 60, completed: false },
+          { name: "Wave Motion, Speed & Progressive Waves", duration_mins: 60, completed: false },
+          { name: "Superposition, Standing Waves & Beats", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_11", subject: "Physics", chapter: "Electrostatics", status: "Unstarted",
+        topics: [
+          { name: "Coulomb's Law & Electric Field", duration_mins: 75, completed: false },
+          { name: "Electric Flux & Gauss's Law", duration_mins: 75, completed: false },
+          { name: "Electric Potential & Potential Energy", duration_mins: 60, completed: false },
+          { name: "Capacitors, Dielectrics & Energy Stored", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "phy_12", subject: "Physics", chapter: "Current Electricity", status: "Unstarted",
+        topics: [
+          { name: "Ohm's Law, Drift Velocity & Resistance", duration_mins: 60, completed: false },
+          { name: "Series/Parallel Combinations & Color Coding", duration_mins: 45, completed: false },
+          { name: "Kirchhoff's Laws & Cells in Combination", duration_mins: 75, completed: false },
+          { name: "Measuring Instruments (Wheatstone, Meter Bridge)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_13", subject: "Physics", chapter: "Magnetic Effects of Current and Magnetism", status: "Unstarted",
+        topics: [
+          { name: "Biot-Savart Law & Magnetic Field of Coils", duration_mins: 60, completed: false },
+          { name: "Ampere's Law & Force on Moving Charges", duration_mins: 75, completed: false },
+          { name: "Force on Conductors & Galvanometer", duration_mins: 60, completed: false },
+          { name: "Earth's Magnetism & Magnetic Properties of Materials", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "phy_14", subject: "Physics", chapter: "Electromagnetic Induction and AC", status: "Unstarted",
+        topics: [
+          { name: "Faraday's & Lenz's Laws, Motional EMF", duration_mins: 60, completed: false },
+          { name: "Self & Mutual Inductance", duration_mins: 45, completed: false },
+          { name: "AC Circuits (L, C, R) & Phasors", duration_mins: 60, completed: false },
+          { name: "LCR Series Circuit, Resonance & Transformers", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "phy_15", subject: "Physics", chapter: "Electromagnetic Waves", status: "Unstarted",
+        topics: [
+          { name: "Displacement Current & EM Wave Properties", duration_mins: 45, completed: false },
+          { name: "Electromagnetic Spectrum & Applications", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 25
+      },
+      {
+        id: "phy_16", subject: "Physics", chapter: "Optics", status: "Unstarted",
+        topics: [
+          { name: "Reflection, Mirrors & Refraction Basics", duration_mins: 60, completed: false },
+          { name: "TIR, Lenses & Lens Maker's Formula", duration_mins: 75, completed: false },
+          { name: "Prisms & Optical Instruments (Microscope/Telescope)", duration_mins: 75, completed: false },
+          { name: "Wave Optics: Huygens Principle & Interference (YDSE)", duration_mins: 75, completed: false },
+          { name: "Diffraction & Polarization", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "phy_17", subject: "Physics", chapter: "Dual Nature of Matter and Radiation", status: "Unstarted",
+        topics: [
+          { name: "Photoelectric Effect & Einstein's Equation", duration_mins: 60, completed: false },
+          { name: "Matter Waves (de Broglie) & X-Rays Basics", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "phy_18", subject: "Physics", chapter: "Atoms and Nuclei", status: "Unstarted",
+        topics: [
+          { name: "Rutherford & Bohr Model of Atom", duration_mins: 60, completed: false },
+          { name: "Atomic Spectra & Energy Levels", duration_mins: 45, completed: false },
+          { name: "Nuclear Structure, Mass Defect & Binding Energy", duration_mins: 45, completed: false },
+          { name: "Radioactivity & Nuclear Reactions", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "phy_19", subject: "Physics", chapter: "Electronic Devices", status: "Unstarted",
+        topics: [
+          { name: "Semiconductors Basics (P-type, N-type)", duration_mins: 45, completed: false },
+          { name: "P-N Junction Diode & Rectifiers", duration_mins: 60, completed: false },
+          { name: "Logic Gates (OR, AND, NOT, NAND, NOR)", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+
+      // --- CHEMISTRY ---
+      {
+        id: "chem_01", subject: "Chemistry", chapter: "Some Basic Concepts of Chemistry", status: "Unstarted",
+        topics: [
+          { name: "Laws of Chemical Combination & Mole Concept", duration_mins: 80, completed: false },
+          { name: "Percentage Composition & Empirical Formula", duration_mins: 60, completed: false },
+          { name: "Stoichiometry & Limiting Reagent", duration_mins: 90, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "chem_02", subject: "Chemistry", chapter: "Atomic Structure", status: "Unstarted",
+        topics: [
+          { name: "Subatomic Particles & Bohr's Model", duration_mins: 60, completed: false },
+          { name: "Dual Nature, de Broglie & Heisenberg Principle", duration_mins: 60, completed: false },
+          { name: "Quantum Numbers & Electronic Configuration", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_03", subject: "Chemistry", chapter: "Chemical Bonding and Molecular Structure", status: "Unstarted",
+        topics: [
+          { name: "Ionic/Covalent Bonds & Lewis Structures", duration_mins: 60, completed: false },
+          { name: "VSEPR Theory & Hybridisation", duration_mins: 90, completed: false },
+          { name: "Molecular Orbital Theory (MOT) & Hydrogen Bonding", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_04", subject: "Chemistry", chapter: "Chemical Thermodynamics", status: "Unstarted",
+        topics: [
+          { name: "First Law, Work, Heat & Internal Energy", duration_mins: 60, completed: false },
+          { name: "Enthalpy & Hess's Law", duration_mins: 75, completed: false },
+          { name: "Entropy, Gibbs Free Energy & Spontaneity", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_05", subject: "Chemistry", chapter: "Solutions", status: "Unstarted",
+        topics: [
+          { name: "Concentration Terms & Solubility", duration_mins: 60, completed: false },
+          { name: "Raoult's Law & Ideal/Non-Ideal Solutions", duration_mins: 60, completed: false },
+          { name: "Colligative Properties & Van't Hoff Factor", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_06", subject: "Chemistry", chapter: "Equilibrium", status: "Unstarted",
+        topics: [
+          { name: "Chemical Equilibrium & Le Chatelier's Principle", duration_mins: 75, completed: false },
+          { name: "Acids, Bases, pH & Buffer Solutions", duration_mins: 75, completed: false },
+          { name: "Solubility Product & Hydrolysis of Salts", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_07", subject: "Chemistry", chapter: "Redox Reactions and Electrochemistry", status: "Unstarted",
+        topics: [
+          { name: "Oxidation Number & Balancing Redox Reactions", duration_mins: 60, completed: false },
+          { name: "Galvanic Cells, Nernst Equation & EMF", duration_mins: 75, completed: false },
+          { name: "Conductance, Kohlrausch's Law & Electrolysis", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_08", subject: "Chemistry", chapter: "Chemical Kinetics", status: "Unstarted",
+        topics: [
+          { name: "Rate of Reaction & Rate Law", duration_mins: 45, completed: false },
+          { name: "Order, Molecularity & Integrated Rate Equations", duration_mins: 75, completed: false },
+          { name: "Arrhenius Equation & Collision Theory", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_09", subject: "Chemistry", chapter: "Classification of Elements and Periodicity", status: "Unstarted",
+        topics: [
+          { name: "Modern Periodic Table & Electronic Configuration", duration_mins: 45, completed: false },
+          { name: "Periodic Trends (Atomic Radius, Ionization Enthalpy)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "chem_10", subject: "Chemistry", chapter: "p-Block Elements", status: "Unstarted",
+        topics: [
+          { name: "Group 13 & 14 Elements (General Trends)", duration_mins: 60, completed: false },
+          { name: "Group 15 & 16 Elements (Properties & Compounds)", duration_mins: 75, completed: false },
+          { name: "Group 17 & 18 Elements (Halogens & Noble Gases)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_11", subject: "Chemistry", chapter: "d- and f-Block Elements", status: "Unstarted",
+        topics: [
+          { name: "Transition Elements: Properties & Trends", duration_mins: 75, completed: false },
+          { name: "K2Cr2O7, KMnO4 & f-Block Elements (Lanthanoids)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "chem_12", subject: "Chemistry", chapter: "Coordination Compounds", status: "Unstarted",
+        topics: [
+          { name: "Ligands, Nomenclature & Werner's Theory", duration_mins: 60, completed: false },
+          { name: "Isomerism in Coordination Compounds", duration_mins: 60, completed: false },
+          { name: "Valence Bond Theory (VBT) & Crystal Field Theory (CFT)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_13", subject: "Chemistry", chapter: "Purification and Characterisation of Organic Compounds", status: "Unstarted",
+        topics: [
+          { name: "Purification Methods (Distillation, Chromatography)", duration_mins: 45, completed: false },
+          { name: "Qualitative & Quantitative Analysis (Lassaigne, Dumas)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "chem_14", subject: "Chemistry", chapter: "Some Basic Principles of Organic Chemistry (GOC)", status: "Unstarted",
+        topics: [
+          { name: "IUPAC Nomenclature & Structural Isomerism", duration_mins: 60, completed: false },
+          { name: "Stereoisomerism (Geometrical & Optical)", duration_mins: 75, completed: false },
+          { name: "Electronic Effects (Inductive, Resonance, Hyperconjugation)", duration_mins: 90, completed: false },
+          { name: "Reaction Intermediates & Carbocations", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 50
+      },
+      {
+        id: "chem_15", subject: "Chemistry", chapter: "Hydrocarbons", status: "Unstarted",
+        topics: [
+          { name: "Alkanes (Preparation & Properties)", duration_mins: 45, completed: false },
+          { name: "Alkenes & Alkynes (Electrophilic Addition, Ozonolysis)", duration_mins: 75, completed: false },
+          { name: "Aromatic Hydrocarbons (Benzene, Electrophilic Substitution)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_16", subject: "Chemistry", chapter: "Haloalkanes and Haloarenes", status: "Unstarted",
+        topics: [
+          { name: "Preparation & Physical Properties", duration_mins: 45, completed: false },
+          { name: "Nucleophilic Substitution (SN1 & SN2 Mechanisms)", duration_mins: 75, completed: false },
+          { name: "Elimination Reactions & Haloarenes", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_17", subject: "Chemistry", chapter: "Alcohols, Phenols and Ethers", status: "Unstarted",
+        topics: [
+          { name: "Alcohols (Preparation, Properties & Dehydration)", duration_mins: 60, completed: false },
+          { name: "Phenols (Acidity & Electrophilic Substitution)", duration_mins: 60, completed: false },
+          { name: "Ethers (Preparation & Cleavage by Acids)", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "chem_18", subject: "Chemistry", chapter: "Aldehydes, Ketones and Carboxylic Acids", status: "Unstarted",
+        topics: [
+          { name: "Preparation of Aldehydes & Ketones", duration_mins: 45, completed: false },
+          { name: "Nucleophilic Addition & Name Reactions (Aldol, Cannizzaro)", duration_mins: 90, completed: false },
+          { name: "Carboxylic Acids (Acidity & Reactions)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "chem_19", subject: "Chemistry", chapter: "Amines", status: "Unstarted",
+        topics: [
+          { name: "Preparation & Basic Character of Amines", duration_mins: 60, completed: false },
+          { name: "Chemical Reactions of Amines", duration_mins: 45, completed: false },
+          { name: "Diazonium Salts & Synthetic Applications", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "chem_20", subject: "Chemistry", chapter: "Biomolecules", status: "Unstarted",
+        topics: [
+          { name: "Carbohydrates (Glucose, Fructose & Structures)", duration_mins: 60, completed: false },
+          { name: "Proteins (Amino Acids, Peptide Bond & Enzymes)", duration_mins: 60, completed: false },
+          { name: "Nucleic Acids (DNA, RNA) & Vitamins", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+
+      // --- BOTANY ---
+      {
+        id: "bot_01", subject: "Botany", chapter: "The Living World", status: "Unstarted",
+        topics: [
+          { name: "What is Living? & Biodiversity", duration_mins: 45, completed: false },
+          { name: "Taxonomic Categories & Nomenclature", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 25
+      },
+      {
+        id: "bot_02", subject: "Botany", chapter: "Biological Classification", status: "Unstarted",
+        topics: [
+          { name: "Monera & Protista", duration_mins: 60, completed: false },
+          { name: "Fungi, Viruses, Viroids & Lichens", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "bot_03", subject: "Botany", chapter: "Plant Kingdom", status: "Unstarted",
+        topics: [
+          { name: "Algae & Bryophytes", duration_mins: 60, completed: false },
+          { name: "Pteridophytes & Gymnosperms", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "bot_04", subject: "Botany", chapter: "Morphology of Flowering Plants", status: "Unstarted",
+        topics: [
+          { name: "Root, Stem & Leaf (Modifications)", duration_mins: 60, completed: false },
+          { name: "Inflorescence, Flower & Fruit", duration_mins: 60, completed: false },
+          { name: "Plant Families (Solanaceae & new NMC additions)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "bot_05", subject: "Botany", chapter: "Anatomy of Flowering Plants", status: "Unstarted",
+        topics: [
+          { name: "Meristematic & Permanent Tissues", duration_mins: 60, completed: false },
+          { name: "Tissue Systems & Anatomy of Dicot/Monocot Roots, Stems, Leaves", duration_mins: 90, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "bot_06", subject: "Botany", chapter: "Cell: The Unit of Life", status: "Unstarted",
+        topics: [
+          { name: "Prokaryotic Cells & Cell Envelopes", duration_mins: 45, completed: false },
+          { name: "Eukaryotic Cells: Endomembrane System", duration_mins: 60, completed: false },
+          { name: "Mitochondria, Plastids, Nucleus & Chromosomes", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "bot_07", subject: "Botany", chapter: "Cell Cycle and Cell Division", status: "Unstarted",
+        topics: [
+          { name: "Cell Cycle & Mitosis", duration_mins: 60, completed: false },
+          { name: "Meiosis & its Significance", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "bot_08", subject: "Botany", chapter: "Photosynthesis in Higher Plants", status: "Unstarted",
+        topics: [
+          { name: "Light Reaction & Photosynthetic Pigments", duration_mins: 60, completed: false },
+          { name: "Dark Reaction (C3 & C4 Pathways)", duration_mins: 75, completed: false },
+          { name: "Photorespiration & Factors Affecting Photosynthesis", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "bot_09", subject: "Botany", chapter: "Respiration in Plants", status: "Unstarted",
+        topics: [
+          { name: "Glycolysis & Fermentation", duration_mins: 60, completed: false },
+          { name: "Krebs Cycle & Electron Transport System (ETS)", duration_mins: 75, completed: false },
+          { name: "Amphibolic Pathway & Respiratory Quotient", duration_mins: 30, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "bot_10", subject: "Botany", chapter: "Plant Growth and Development", status: "Unstarted",
+        topics: [
+          { name: "Phases of Growth & Differentiation", duration_mins: 45, completed: false },
+          { name: "Plant Growth Regulators (Auxin, Gibberellin, Cytokinin, etc.)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "bot_11", subject: "Botany", chapter: "Sexual Reproduction in Flowering Plants", status: "Unstarted",
+        topics: [
+          { name: "Microsporogenesis & Male Gametophyte", duration_mins: 60, completed: false },
+          { name: "Megasporogenesis & Female Gametophyte", duration_mins: 60, completed: false },
+          { name: "Pollination, Fertilization & Embryo Development", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "bot_12", subject: "Botany", chapter: "Principles of Inheritance and Variation", status: "Unstarted",
+        topics: [
+          { name: "Mendelian Genetics & Deviations (Incomplete Dominance, Co-dominance)", duration_mins: 75, completed: false },
+          { name: "Chromosomal Theory & Linkage/Recombination", duration_mins: 75, completed: false },
+          { name: "Sex Determination & Genetic Disorders", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 50
+      },
+      {
+        id: "bot_13", subject: "Botany", chapter: "Molecular Basis of Inheritance", status: "Unstarted",
+        topics: [
+          { name: "DNA Structure & Packaging", duration_mins: 60, completed: false },
+          { name: "DNA Replication & Transcription", duration_mins: 75, completed: false },
+          { name: "Genetic Code, Translation & Lac Operon", duration_mins: 75, completed: false },
+          { name: "Human Genome Project & DNA Fingerprinting", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 50
+      },
+      {
+        id: "bot_14", subject: "Botany", chapter: "Microbes in Human Welfare", status: "Unstarted",
+        topics: [
+          { name: "Microbes in Household, Industrial Products & Sewage Treatment", duration_mins: 60, completed: false },
+          { name: "Microbes as Biocontrol Agents & Biofertilizers", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "bot_15", subject: "Botany", chapter: "Organisms and Populations", status: "Unstarted",
+        topics: [
+          { name: "Population Attributes & Growth Models", duration_mins: 60, completed: false },
+          { name: "Population Interactions (Predation, Competition, Parasitism, etc.)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "bot_16", subject: "Botany", chapter: "Ecosystem", status: "Unstarted",
+        topics: [
+          { name: "Ecosystem Structure, Productivity & Decomposition", duration_mins: 60, completed: false },
+          { name: "Energy Flow & Ecological Pyramids", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+      {
+        id: "bot_17", subject: "Botany", chapter: "Biodiversity and Conservation", status: "Unstarted",
+        topics: [
+          { name: "Patterns of Biodiversity & Importance", duration_mins: 45, completed: false },
+          { name: "Loss of Biodiversity & Conservation Strategies", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 30
+      },
+
+      // --- ZOOLOGY ---
+      {
+        id: "zoo_01", subject: "Zoology", chapter: "Animal Kingdom", status: "Unstarted",
+        topics: [
+          { name: "Basis of Classification & Non-Chordates (Porifera to Aschelminthes)", duration_mins: 60, completed: false },
+          { name: "Non-Chordates (Annelida to Hemichordata)", duration_mins: 60, completed: false },
+          { name: "Chordates (Pisces, Amphibia, Reptilia, Aves, Mammalia)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "zoo_02", subject: "Zoology", chapter: "Structural Organisation in Animals", status: "Unstarted",
+        topics: [
+          { name: "Animal Tissues (Epithelial, Connective, Muscular, Neural)", duration_mins: 75, completed: false },
+          { name: "Morphology & Anatomy of Frog", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_03", subject: "Zoology", chapter: "Biomolecules", status: "Unstarted",
+        topics: [
+          { name: "Amino Acids, Proteins & Carbohydrates", duration_mins: 60, completed: false },
+          { name: "Lipids, Nucleic Acids & Dynamic State of Body Constituents", duration_mins: 60, completed: false },
+          { name: "Enzymes: Properties & Action", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_04", subject: "Zoology", chapter: "Breathing and Exchange of Gases", status: "Unstarted",
+        topics: [
+          { name: "Human Respiratory System & Mechanism of Breathing", duration_mins: 60, completed: false },
+          { name: "Exchange/Transport of Gases & Regulation", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "zoo_05", subject: "Zoology", chapter: "Body Fluids and Circulation", status: "Unstarted",
+        topics: [
+          { name: "Blood, Lymph & Blood Groups", duration_mins: 45, completed: false },
+          { name: "Human Heart, Cardiac Cycle & ECG", duration_mins: 75, completed: false },
+          { name: "Regulation of Cardiac Activity & Disorders", duration_mins: 30, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_06", subject: "Zoology", chapter: "Excretory Products and their Elimination", status: "Unstarted",
+        topics: [
+          { name: "Human Excretory System & Urine Formation", duration_mins: 60, completed: false },
+          { name: "Function of Tubules & Regulation of Kidney Function", duration_mins: 60, completed: false },
+          { name: "Micturition & Role of Other Organs in Excretion", duration_mins: 30, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_07", subject: "Zoology", chapter: "Locomotion and Movement", status: "Unstarted",
+        topics: [
+          { name: "Types of Movement & Muscle Structure", duration_mins: 60, completed: false },
+          { name: "Mechanism of Muscle Contraction", duration_mins: 60, completed: false },
+          { name: "Skeletal System & Joints", duration_mins: 45, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_08", subject: "Zoology", chapter: "Neural Control and Coordination", status: "Unstarted",
+        topics: [
+          { name: "Neurons & Generation/Conduction of Nerve Impulse", duration_mins: 60, completed: false },
+          { name: "Central Nervous System (Brain & Spinal Cord)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "zoo_09", subject: "Zoology", chapter: "Chemical Coordination and Integration", status: "Unstarted",
+        topics: [
+          { name: "Hypothalamus, Pituitary & Pineal Gland", duration_mins: 60, completed: false },
+          { name: "Thyroid, Parathyroid, Thymus & Adrenal Gland", duration_mins: 60, completed: false },
+          { name: "Pancreas, Gonads & Mechanism of Hormone Action", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_10", subject: "Zoology", chapter: "Human Reproduction", status: "Unstarted",
+        topics: [
+          { name: "Male & Female Reproductive Systems", duration_mins: 60, completed: false },
+          { name: "Gametogenesis (Spermatogenesis & Oogenesis)", duration_mins: 60, completed: false },
+          { name: "Menstrual Cycle, Fertilization & Implantation", duration_mins: 60, completed: false },
+          { name: "Pregnancy, Embryonic Development, Parturition & Lactation", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "zoo_11", subject: "Zoology", chapter: "Reproductive Health", status: "Unstarted",
+        topics: [
+          { name: "Population Explosion & Birth Control Methods", duration_mins: 60, completed: false },
+          { name: "MTP, STIs & Infertility (ARTs)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      },
+      {
+        id: "zoo_12", subject: "Zoology", chapter: "Evolution", status: "Unstarted",
+        topics: [
+          { name: "Origin of Life & Evidences for Evolution", duration_mins: 60, completed: false },
+          { name: "Theories of Evolution (Darwin, Lamarck, Mutation)", duration_mins: 60, completed: false },
+          { name: "Hardy-Weinberg Principle & Human Evolution", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "zoo_13", subject: "Zoology", chapter: "Human Health and Disease", status: "Unstarted",
+        topics: [
+          { name: "Common Human Diseases (Bacterial, Viral, Fungal, Parasitic)", duration_mins: 60, completed: false },
+          { name: "Immunity (Innate, Acquired, Active/Passive, Allergies)", duration_mins: 75, completed: false },
+          { name: "AIDS, Cancer, Drugs & Alcohol Abuse", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 45
+      },
+      {
+        id: "zoo_14", subject: "Zoology", chapter: "Biotechnology: Principles and Processes", status: "Unstarted",
+        topics: [
+          { name: "Principles & Tools of Recombinant DNA Technology", duration_mins: 75, completed: false },
+          { name: "Processes of Recombinant DNA Technology (PCR, Bioreactors)", duration_mins: 75, completed: false }
+        ],
+        dpp_mcqs_per_topic: 40
+      },
+      {
+        id: "zoo_15", subject: "Zoology", chapter: "Biotechnology and its Applications", status: "Unstarted",
+        topics: [
+          { name: "Applications in Agriculture (Bt Cotton, RNAi)", duration_mins: 60, completed: false },
+          { name: "Applications in Medicine (Insulin, Gene Therapy, Transgenic Animals)", duration_mins: 60, completed: false }
+        ],
+        dpp_mcqs_per_topic: 35
+      }
+    ];
+
+    // ============================================================================
+    // CONSTANTS & DUAL-PERSISTENCE ENGINE (LOCALSTORAGE + INDEXEDDB + MIGRATION)
+    // ============================================================================
+    const STORAGE_KEY = "neet360_tracker_master_db";
+    const LEGACY_KEYS = ["neet360_nmc_topic_tracker_v6", "neet360_custom_tracker_state_v5", "neet360_custom_tracker_state_v4"];
+    const IDB_NAME = "NEET360TrackerDB";
+    const IDB_STORE = "appStateStore";
+    const IDB_KEY = "masterState";
+
+    function openTrackerIDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject(new Error("No IndexedDB"));
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveToIndexedDB(stateObj) {
+      try {
+        const db = await openTrackerIDB();
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).put(stateObj, IDB_KEY);
+      } catch (e) {}
+    }
+
+    async function loadFromIndexedDB() {
+      try {
+        const db = await openTrackerIDB();
+        return await new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, "readonly");
+          const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function clearIndexedDB() {
+      try {
+        const db = await openTrackerIDB();
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(IDB_KEY);
+      } catch (e) {}
+    }
+    const BUCKET_STATUSES = [
+      "Unstarted",
+      "Current",
+      "Mock Priority",
+      "Backlog",
+      "Completed"
+    ];
+
+    const SUBJECT_TEACHERS = {
+      Physics: ["MR Sir", "Salim Sir", "Rajwant Sir", "Alakh Pandey Sir"],
+      Chemistry: ["Sudhanshu Sir", "Pankaj Sir", "Amit Mahajan Sir", "Mohit Dadheech Sir"],
+      Botany: ["Rupesh Sir", "Vipin Sharma Sir", "Tarun Sir", "Rishabh Choubey Sir"],
+      Zoology: ["Samapti Mam", "MD Sir", "Akanksha Mam", "Nomesh Sir"]
+    };
+
+    function getDateOffsetStr(daysOffset = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysOffset);
+      return d.toISOString().split("T")[0];
+    }
+
+    function getEffectiveMockCycleConfig(stateObj) {
+      const todayStr = getDateOffsetStr(0);
+      const rawInterval = Math.max(2, parseInt((stateObj && stateObj.mockCycleIntervalDays) || 14, 10));
+      const rawWeekday = stateObj && stateObj.mockCycleWeekday !== undefined ? String(stateObj.mockCycleWeekday) : "0";
+      const autoSprint = stateObj ? stateObj.autoSprint1DayGapEnabled !== false : true;
+      const sprintDate = (stateObj && stateObj.sprintStartDate) || getDateOffsetStr(105);
+      const globalOverride = (stateObj && stateObj.globalMockOverrideDate) || "";
+
+      // Check if an active Occasion/Postpone Override Date is set for today or a future date
+      if (globalOverride && globalOverride >= todayStr) {
+        return {
+          mode: "postponed",
+          effectiveInterval: rawInterval,
+          effectiveWeekday: rawWeekday,
+          nextMockDate: globalOverride,
+          label: `Postponed Mock (${globalOverride})`
+        };
+      }
+
+      // Check if we have entered the Final Sprint 1-Day Gap phase (after ~3-4 months)
+      const inFinalSprint = autoSprint && sprintDate && todayStr >= sprintDate;
+      const effectiveInterval = inFinalSprint ? 2 : rawInterval;
+      const effectiveWeekday = effectiveInterval <= 3 ? "any" : rawWeekday;
+
+      const now = new Date();
+      const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      base.setDate(base.getDate() + effectiveInterval);
+
+      if (effectiveWeekday !== "any") {
+        const desiredDow = parseInt(effectiveWeekday, 10);
+        const currentDow = base.getDay();
+        if (!isNaN(desiredDow) && currentDow !== desiredDow) {
+          const diff = (desiredDow - currentDow + 7) % 7;
+          base.setDate(base.getDate() + diff);
+        }
+      }
+
+      const nextMockDate = base.toISOString().split("T")[0];
+      const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const dowLabel = effectiveWeekday === "any" ? "Any Day" : weekdayNames[parseInt(effectiveWeekday, 10) || 0];
+
+      return {
+        mode: inFinalSprint ? "sprint" : (effectiveInterval === 2 ? "1daygap" : "regular"),
+        effectiveInterval,
+        effectiveWeekday,
+        nextMockDate,
+        label: inFinalSprint
+          ? `⚡ Final Phase: 1-Day Gap (Every 2d)`
+          : effectiveInterval === 2
+          ? `1-Day Gap (Every 2d)`
+          : `Every ${effectiveInterval}d (${dowLabel})`
+      };
+    }
+
+    function computeNextDefaultMockDate(intervalDays = 14, targetWeekday = 0, stateOverride = null) {
+      if (stateOverride) {
+        return getEffectiveMockCycleConfig(stateOverride).nextMockDate;
+      }
+      return getEffectiveMockCycleConfig({
+        mockCycleIntervalDays: intervalDays,
+        mockCycleWeekday: targetWeekday,
+        autoSprint1DayGapEnabled: appState ? appState.autoSprint1DayGapEnabled : false,
+        sprintStartDate: appState ? appState.sprintStartDate : "",
+        globalMockOverrideDate: appState ? appState.globalMockOverrideDate : ""
+      }).nextMockDate;
+    }
+
+    function cloneDefaultSyllabus() {
+      return JSON.parse(JSON.stringify(neetSyllabus));
+    }
+
+    function createInitialState() {
+      const syllabusCopy = cloneDefaultSyllabus();
+      const selectedTeachers = {};
+      syllabusCopy.forEach((ch) => {
+        const pool = SUBJECT_TEACHERS[ch.subject] || SUBJECT_TEACHERS.Physics;
+        selectedTeachers[ch.id] = pool[0];
+      });
+
+      const baseState = {
+        syllabus: syllabusCopy,
+        prepStartDate: getDateOffsetStr(0),
+        targetDate: getDateOffsetStr(95),
+        mockCycleIntervalDays: 14,
+        mockCycleWeekday: "0",
+        globalMockOverrideDate: "",
+        autoSprint1DayGapEnabled: true,
+        sprintStartDate: getDateOffsetStr(105),
+        // Progressive Overload: starts strictly at 360 mins (6 hours), max 720 mins (12 hours)
+        daily_study_limit: 360,
+        consistencyStreak: 0,
+        lastStreakAwardDate: null,
+        lectureSpeed: 1.0,
+        dppEstimatedMinsPerTopic: 30,
+        selectedTeachers: selectedTeachers,
+        mockTestDates: {},
+        mockDateOverridden: {},
+        completedAtMap: {},
+        customVideoUrls: {},
+        pushedToTomorrowTopicKeys: {},
+        rescheduledTopicCounts: {},
+        completedTodayTopicKeys: {},
+        lastActiveDate: getDateOffsetStr(0),
+        forecastViewMode: window.innerWidth < 1024 ? "tabs" : "columns",
+        activeForecastDayTab: 0,
+        lastRescheduleReport: null,
+        forecastDays: []
+      };
+
+      baseState.forecastDays = buildTopicWiseThreeDayForecast(baseState);
+      return baseState;
+    }
+
+    let appState = null;
+    let pendingConfirmCallback = null;
+
+    function normalizeBucketStatus(status) {
+      if (status === "Mock Test Priority") return "Mock Priority";
+      if (BUCKET_STATUSES.includes(status)) return status;
+      return "Unstarted";
+    }
+
+    function hydrateStateObject(parsed) {
+      const defaults = createInitialState();
+      const hydrated = Object.assign({}, defaults, parsed);
+
+      const defaultSyllabus = cloneDefaultSyllabus();
+      if (Array.isArray(parsed.syllabus) && parsed.syllabus.length > 0) {
+        const savedMap = new Map(parsed.syllabus.map((c) => [c.id, c]));
+        hydrated.syllabus = defaultSyllabus.map((defCh) => {
+          const savedCh = savedMap.get(defCh.id);
+          if (!savedCh) return defCh;
+          const mergedStatus = normalizeBucketStatus(savedCh.status);
+          const mergedTopics = defCh.topics.map((defTopic, idx) => {
+            const savedTopic = (savedCh.topics && savedCh.topics[idx]) || null;
+            return {
+              name: defTopic.name,
+              duration_mins: defTopic.duration_mins,
+              completed: savedTopic ? !!savedTopic.completed : false
+            };
+          });
+          return Object.assign({}, defCh, {
+            status: mergedStatus,
+            topics: mergedTopics
+          });
+        });
+      } else {
+        hydrated.syllabus = defaultSyllabus;
+      }
+
+      const rawLimit = parseInt(hydrated.daily_study_limit, 10) || 360;
+      hydrated.daily_study_limit = Math.min(720, Math.max(360, rawLimit));
+
+      // Rollover daily transient flags cleanly if a new calendar day has started (without losing chapter/topic progress!)
+      const todayStr = getDateOffsetStr(0);
+      if (hydrated.lastActiveDate && hydrated.lastActiveDate !== todayStr) {
+        hydrated.pushedToTomorrowTopicKeys = {};
+        hydrated.completedTodayTopicKeys = {};
+        hydrated.lastActiveDate = todayStr;
+      } else if (!hydrated.lastActiveDate) {
+        hydrated.lastActiveDate = todayStr;
+      }
+
+      hydrated.forecastDays = buildTopicWiseThreeDayForecast(hydrated);
+      return hydrated;
+    }
+
+    function loadStateFromStorage() {
+      try {
+        let raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          for (const legacyKey of LEGACY_KEYS) {
+            const legacyRaw = localStorage.getItem(legacyKey);
+            if (legacyRaw) {
+              raw = legacyRaw;
+              localStorage.setItem(STORAGE_KEY, legacyRaw);
+              break;
+            }
+          }
+        }
+        if (raw) {
+          appState = hydrateStateObject(JSON.parse(raw));
+          saveStateToStorage();
+        } else {
+          appState = createInitialState();
+          saveStateToStorage();
+        }
+      } catch (err) {
+        appState = createInitialState();
+      }
+    }
+
+    function saveStateToStorage() {
+      try {
+        appState.lastActiveDate = getDateOffsetStr(0);
+        const serialized = JSON.stringify(appState);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        saveToIndexedDB(appState);
+        const badge = document.getElementById("memorySyncBadge");
+        if (badge) {
+          badge.textContent = "💾 Saved";
+        }
+      } catch (err) {
+        // Ignore storage quota exceptions inside restricted preview containers
+      }
+    }
+
+    // ============================================================================
+    // STEP 3: THE 6-HOUR TOPIC-WISE ASSEMBLY LOGIC (TODAY, TOMORROW, DAY 3)
+    // ============================================================================
+    function calculateDaysBetween(fromDateStr, toDateStr) {
+      if (!toDateStr) return 1;
+      const now = new Date();
+      const fromDate = fromDateStr
+        ? new Date(fromDateStr + "T00:00:00")
+        : new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const toDate = new Date(toDateStr + "T00:00:00");
+      const diffMs = toDate.getTime() - fromDate.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      return Math.max(1, diffDays);
+    }
+
+    function calculatePrepDayNumber(prepStartDateStr) {
+      if (!prepStartDateStr) return 1;
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startMidnight = new Date(prepStartDateStr + "T00:00:00");
+      const diffDays = Math.floor((todayMidnight.getTime() - startMidnight.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return Math.max(1, diffDays);
+    }
+
+    /**
+     * Exact 6-Hour Topic-Wise Assembly Engine:
+     * - Iterates through active chapters in priority order: 1. Mock Priority -> 2. Current -> 3. Backlog (20% time allocation).
+     * - Pulls uncompleted topics one by one, adding `topic.duration_mins` (adjusted by playback speed) + `30 mins` for `dpp_mcqs_per_topic` to the daily total.
+     * - Never assigns an entire chapter at once—interleaves topics across active chapters so a single chapter's topics spread across days.
+     * - The moment Today's total hits `daily_study_limit` (starts at 360 mins / 6 hours), it STOPS adding tasks to Today and pushes remaining topics to Tomorrow, and then to Day 3!
+     */
+    function buildTopicWiseThreeDayForecast(stateObj = appState) {
+      const dailyCapMins = Math.min(720, Math.max(360, parseInt(stateObj.daily_study_limit, 10) || 360));
+      const primaryCapMins = Math.round(dailyCapMins * 0.8);
+      const backlogCapMins = dailyCapMins - primaryCapMins;
+      const speed = parseFloat(stateObj.lectureSpeed) || 1.0;
+      const dppMinsPerTopic = Math.max(15, parseInt(stateObj.dppEstimatedMinsPerTopic, 10) || 30);
+
+      const dayLabels = [
+        { dayIndex: 0, title: "Today", subtitle: "Day 1 Execution", dateStr: getDateOffsetStr(0) },
+        { dayIndex: 1, title: "Tomorrow", subtitle: "Day 2 Forecast", dateStr: getDateOffsetStr(1) },
+        { dayIndex: 2, title: "Day 3", subtitle: "Day 3 Forecast", dateStr: getDateOffsetStr(2) }
+      ];
+
+      const forecastDays = dayLabels.map((d) => ({
+        dayIndex: d.dayIndex,
+        title: d.title,
+        subtitle: d.subtitle,
+        dateStr: d.dateStr,
+        dailyCapMins: dailyCapMins,
+        primaryCapMins: primaryCapMins,
+        backlogCapMins: backlogCapMins,
+        primaryTopicTasks: [],
+        backlogTopicTasks: [],
+        usedPrimaryMins: 0,
+        usedBacklogMins: 0,
+        usedTotalMins: 0,
+        chapterTopicsAssignedToday: {}
+      }));
+
+      const syllabusList = stateObj.syllabus || neetSyllabus;
+
+      const activePrimaryChapters = [];
+      const activeBacklogChapters = [];
+
+      syllabusList.forEach((ch) => {
+        const st = normalizeBucketStatus(ch.status);
+        if (st === "Mock Priority" || st === "Current") {
+          activePrimaryChapters.push(ch);
+        } else if (st === "Backlog") {
+          activeBacklogChapters.push(ch);
+        }
+      });
+
+      // Sort Primary Chapters: Mock Priority first (by earliest Mock Test Date), then Current
+      activePrimaryChapters.sort((a, b) => {
+        const stA = normalizeBucketStatus(a.status);
+        const stB = normalizeBucketStatus(b.status);
+        if (stA === "Mock Priority" && stB !== "Mock Priority") return -1;
+        if (stB === "Mock Priority" && stA !== "Mock Priority") return 1;
+        if (stA === "Mock Priority" && stB === "Mock Priority") {
+          const daysA = calculateDaysBetween(null, stateObj.mockTestDates[a.id] || computeNextDefaultMockDate(stateObj.mockCycleIntervalDays, stateObj.mockCycleWeekday));
+          const daysB = calculateDaysBetween(null, stateObj.mockTestDates[b.id] || computeNextDefaultMockDate(stateObj.mockCycleIntervalDays, stateObj.mockCycleWeekday));
+          return daysA - daysB;
+        }
+        return 0;
+      });
+
+      // Helper to build a Topic Task Card Object
+      function createTopicTaskItem(chapter, topicObj, topicIndex) {
+        const topicKey = `${chapter.id}__topic_${topicIndex}`;
+        const st = normalizeBucketStatus(chapter.status);
+        const lectureMins = Math.round(topicObj.duration_mins / speed);
+        const totalTopicMins = lectureMins + dppMinsPerTopic;
+        return {
+          topicKey: topicKey,
+          chapterId: chapter.id,
+          subject: chapter.subject,
+          chapterName: chapter.chapter,
+          statusBucket: st,
+          section: st === "Backlog" ? "backlog" : "primary",
+          topicIndex: topicIndex,
+          topicName: topicObj.name,
+          rawLectureMins: topicObj.duration_mins,
+          lectureMins: lectureMins,
+          dppMins: dppMinsPerTopic,
+          totalTopicMins: totalTopicMins,
+          dppMcqCount: chapter.dpp_mcqs_per_topic || 30,
+          completed: !!topicObj.completed,
+          pushedToTomorrow: !!stateObj.pushedToTomorrowTopicKeys[topicKey],
+          rescheduledCount: stateObj.rescheduledTopicCounts[topicKey] || 0
+        };
+      }
+
+      // First, keep any topics that were checked off during Today's session visible on Day 0 (Today)
+      // so the live progress bar reflects completed topics!
+      [...activePrimaryChapters, ...activeBacklogChapters].forEach((ch) => {
+        ch.topics.forEach((tObj, idx) => {
+          const tKey = `${ch.id}__topic_${idx}`;
+          if (tObj.completed && stateObj.completedTodayTopicKeys && stateObj.completedTodayTopicKeys[tKey]) {
+            const item = createTopicTaskItem(ch, tObj, idx);
+            if (forecastDays[0].usedTotalMins + item.totalTopicMins <= dailyCapMins) {
+              if (item.section === "backlog") {
+                forecastDays[0].backlogTopicTasks.push(item);
+                forecastDays[0].usedBacklogMins += item.totalTopicMins;
+              } else {
+                forecastDays[0].primaryTopicTasks.push(item);
+                forecastDays[0].usedPrimaryMins += item.totalTopicMins;
+              }
+              forecastDays[0].usedTotalMins += item.totalTopicMins;
+              forecastDays[0].chapterTopicsAssignedToday[ch.id] = (forecastDays[0].chapterTopicsAssignedToday[ch.id] || 0) + 1;
+            }
+          }
+        });
+      });
+
+      // Build interleaved topic queues so we pull uncompleted topics one by one across active chapters
+      // (ensuring we NEVER dump an entire chapter's topics into one day if other chapters are active, and max 2 topics per chapter per day)
+      function buildInterleavedUncompletedTopicQueue(chaptersArray) {
+        const queuesByCh = chaptersArray.map((ch) => {
+          const uncompleted = [];
+          ch.topics.forEach((tObj, idx) => {
+            if (!tObj.completed) {
+              uncompleted.push(createTopicTaskItem(ch, tObj, idx));
+            }
+          });
+          return {
+            chapter: ch,
+            maxTopicsPerDay: Math.max(1, ch.topics.length - 1), // strictly less than full chapter if chapter has >=2 topics
+            items: uncompleted
+          };
+        });
+
+        const interleaved = [];
+        let hasMore = true;
+        let round = 0;
+        while (hasMore) {
+          hasMore = false;
+          queuesByCh.forEach((q) => {
+            if (round < q.items.length) {
+              interleaved.push({
+                taskItem: q.items[round],
+                maxTopicsPerDay: q.maxTopicsPerDay
+              });
+              hasMore = true;
+            }
+          });
+          round++;
+        }
+        return interleaved;
+      }
+
+      const primaryTopicQueue = buildInterleavedUncompletedTopicQueue(activePrimaryChapters);
+      const backlogTopicQueue = buildInterleavedUncompletedTopicQueue(activeBacklogChapters);
+
+      let overflowCount = 0;
+
+      // Step A: Fill Day 0 (Today), Day 1 (Tomorrow), Day 2 (Day 3) sequentially:
+      // For each day, pull Primary topics up to 80% budget (or full cap if no backlog exists) and Backlog topics up to 20% budget.
+      // The moment a day hits `daily_study_limit`, stop adding to that day and push remaining topics to the next day!
+      primaryTopicQueue.forEach(({ taskItem, maxTopicsPerDay }) => {
+        let placed = false;
+        for (let d = 0; d < forecastDays.length; d++) {
+          const dayObj = forecastDays[d];
+          if (dayObj.dayIndex === 0 && taskItem.pushedToTomorrow) continue;
+
+          const countForCh = dayObj.chapterTopicsAssignedToday[taskItem.chapterId] || 0;
+          if (countForCh >= maxTopicsPerDay) continue;
+
+          const effectivePrimaryLimit = backlogTopicQueue.length > 0 ? dayObj.primaryCapMins : dayObj.dailyCapMins;
+
+          if (
+            dayObj.usedPrimaryMins + taskItem.totalTopicMins <= effectivePrimaryLimit &&
+            dayObj.usedTotalMins + taskItem.totalTopicMins <= dayObj.dailyCapMins
+          ) {
+            dayObj.primaryTopicTasks.push(taskItem);
+            dayObj.usedPrimaryMins += taskItem.totalTopicMins;
+            dayObj.usedTotalMins += taskItem.totalTopicMins;
+            dayObj.chapterTopicsAssignedToday[taskItem.chapterId] = countForCh + 1;
+            placed = true;
+            break;
+          }
+        }
+
+        // Second pass for Primary topic if a day still had spare room below dailyCapMins
+        if (!placed) {
+          for (let d = 0; d < forecastDays.length; d++) {
+            const dayObj = forecastDays[d];
+            if (dayObj.dayIndex === 0 && taskItem.pushedToTomorrow) continue;
+            const countForCh = dayObj.chapterTopicsAssignedToday[taskItem.chapterId] || 0;
+            if (countForCh >= maxTopicsPerDay) continue;
+
+            if (dayObj.usedTotalMins + taskItem.totalTopicMins <= dayObj.dailyCapMins) {
+              dayObj.primaryTopicTasks.push(taskItem);
+              dayObj.usedPrimaryMins += taskItem.totalTopicMins;
+              dayObj.usedTotalMins += taskItem.totalTopicMins;
+              dayObj.chapterTopicsAssignedToday[taskItem.chapterId] = countForCh + 1;
+              placed = true;
+              break;
+            }
+          }
+        }
+
+        if (!placed) {
+          overflowCount += 1;
+        }
+      });
+
+      // Step B: Pull Backlog topics into the 20% Backlog allocation across Today -> Tomorrow -> Day 3
+      backlogTopicQueue.forEach(({ taskItem, maxTopicsPerDay }) => {
+        let placed = false;
+        for (let d = 0; d < forecastDays.length; d++) {
+          const dayObj = forecastDays[d];
+          if (dayObj.dayIndex === 0 && taskItem.pushedToTomorrow) continue;
+
+          const countForCh = dayObj.chapterTopicsAssignedToday[taskItem.chapterId] || 0;
+          if (countForCh >= maxTopicsPerDay) continue;
+
+          if (dayObj.usedTotalMins + taskItem.totalTopicMins <= dayObj.dailyCapMins) {
+            dayObj.backlogTopicTasks.push(taskItem);
+            dayObj.usedBacklogMins += taskItem.totalTopicMins;
+            dayObj.usedTotalMins += taskItem.totalTopicMins;
+            dayObj.chapterTopicsAssignedToday[taskItem.chapterId] = countForCh + 1;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          overflowCount += 1;
+        }
+      });
+
+      forecastDays.overflowTaskCount = overflowCount;
+      return forecastDays;
+    }
+
+    function calculateSyllabusWorkloadStats(stateObj = appState) {
+      const bucketCounts = {
+        "Unstarted": 0,
+        "Current": 0,
+        "Mock Priority": 0,
+        "Backlog": 0,
+        "Completed": 0
+      };
+
+      (stateObj.syllabus || neetSyllabus).forEach((ch) => {
+        const st = normalizeBucketStatus(ch.status);
+        if (bucketCounts[st] !== undefined) {
+          bucketCounts[st] += 1;
+        }
+      });
+
+      const daysAvailable = calculateDaysBetween(null, stateObj.targetDate);
+      const prepDayNumber = calculatePrepDayNumber(stateObj.prepStartDate);
+      const dailyCapMins = Math.min(720, Math.max(360, parseInt(stateObj.daily_study_limit, 10) || 360));
+      const primaryBudgetMins = Math.round(dailyCapMins * 0.8);
+      const backlogBudgetMins = dailyCapMins - primaryBudgetMins;
+      const mockCycleInfo = getEffectiveMockCycleConfig(stateObj);
+      const nextDefaultMockDate = mockCycleInfo.nextMockDate;
+
+      return {
+        bucketCounts,
+        daysAvailable,
+        prepDayNumber,
+        dailyCapMins,
+        primaryBudgetMins,
+        backlogBudgetMins,
+        nextDefaultMockDate,
+        mockCycleInfo
+      };
+    }
+
+    function formatMinutesToHrMin(totalMinutes) {
+      const mins = Math.max(0, Math.round(Number(totalMinutes) || 0));
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h === 0) return `${m}m`;
+      if (m === 0) return `${h}h 00m`;
+      return `${h}h ${m}m`;
+    }
+
+    function formatHoursDecimal(totalMinutes) {
+      const hrs = Math.max(0, (Number(totalMinutes) || 0) / 60);
+      const rounded = Math.round(hrs * 10) / 10;
+      return `${rounded} ${rounded === 1 ? "Hour" : "Hours"}`;
+    }
+
+    // ============================================================================
+    // PROGRESSIVE OVERLOAD STREAK ENGINE (3 CONSECUTIVE DAYS -> +30 MINS UP TO 12H)
+    // ============================================================================
+    function recordDailyStreakCompletion(triggerSource = "auto") {
+      const todayKey = getDateOffsetStr(0);
+      if (appState.lastStreakAwardDate === todayKey && triggerSource === "auto") {
+        return;
+      }
+
+      appState.consistencyStreak = (parseInt(appState.consistencyStreak, 10) || 0) + 1;
+      appState.lastStreakAwardDate = todayKey;
+
+      if (appState.consistencyStreak % 3 === 0) {
+        const oldLimit = appState.daily_study_limit || 360;
+        const newLimit = Math.min(720, oldLimit + 30);
+        appState.daily_study_limit = newLimit;
+        appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+        saveStateToStorage();
+        renderDashboard();
+        showToast(
+          `🔥 ${appState.consistencyStreak}-Day Consistency Streak! Progressive Overload unlocked: Daily Capacity increased to ${formatHoursDecimal(newLimit)} (${newLimit} mins)!`,
+          "success"
+        );
+      } else {
+        const daysToNextBoost = 3 - (appState.consistencyStreak % 3);
+        saveStateToStorage();
+        renderDashboard();
+        showToast(
+          `🔥 Consistency Streak: ${appState.consistencyStreak} Day(s)! Complete ${daysToNextBoost} more 100% day(s) to unlock +30m Daily Capacity.`,
+          "success"
+        );
+      }
+    }
+
+    // ============================================================================
+    // UI HELPERS: TOASTS, MODALS, YOUTUBE TOPIC AUTO-SEARCH & BADGES
+    // ============================================================================
+    function showToast(message, variant = "info") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      const borderMap = {
+        info: "border-indigo-500/50 bg-slate-900/95 text-slate-100",
+        success: "border-emerald-500/50 bg-slate-900/95 text-emerald-200",
+        warning: "border-amber-500/50 bg-slate-900/95 text-amber-200"
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs sm:text-sm font-medium transition-all duration-300 ${borderMap[variant] || borderMap.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3600);
+    }
+
+    function openConfirmModal(title, message, badgeText, onConfirm) {
+      const modal = document.getElementById("confirmModal");
+      document.getElementById("confirmModalTitle").textContent = title;
+      document.getElementById("confirmModalMessage").textContent = message;
+      document.getElementById("confirmModalBadge").textContent = badgeText || "Action Required";
+      pendingConfirmCallback = onConfirm;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById("confirmModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      pendingConfirmCallback = null;
+    }
+
+    function getSubjectBadgeHtml(subject) {
+      const styles = {
+        Physics: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+        Chemistry: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+        Botany: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+        Zoology: "bg-pink-500/15 text-pink-300 border-pink-500/30"
+      };
+      return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${styles[subject] || styles.Physics}">${subject}</span>`;
+    }
+
+    function getBucketBadgeHtml(status, mockDateStr = null) {
+      const norm = normalizeBucketStatus(status);
+      const styles = {
+        "Mock Priority": "bg-rose-500/20 text-rose-300 border-rose-500/40",
+        "Current": "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+        "Backlog": "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        "Unstarted": "bg-slate-800 text-slate-400 border-slate-700",
+        "Completed": "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+      };
+      let label = norm;
+      if (norm === "Mock Priority") {
+        const dLeft = mockDateStr ? calculateDaysBetween(null, mockDateStr) : null;
+        label = dLeft ? `🚨 Mock in ${dLeft}d (${mockDateStr})` : "🚨 Mock Priority";
+      } else if (norm === "Current") {
+        label = "📘 Current";
+      } else if (norm === "Backlog") {
+        label = "🛠️ Backlog";
+      } else if (norm === "Unstarted") {
+        label = "⏸️ Unstarted";
+      } else if (norm === "Completed") {
+        label = "✅ Completed";
+      }
+      return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${styles[norm] || styles["Unstarted"]}">${label}</span>`;
+    }
+
+    /**
+     * Exact YouTube auto-search query requested:
+     * "Physics Wallah One Shot [Chapter Name] [Topic Name]"
+     */
+    function buildYouTubeTopicSearchUrl(chapterName, topicName) {
+      const queryRaw = `Physics Wallah One Shot ${chapterName} ${topicName}`;
+      const encoded = encodeURIComponent(queryRaw).replace(/%20/g, "+");
+      return `https://www.youtube.com/results?search_query=${encoded}`;
+    }
+
+    // ============================================================================
+    // VIEW NAVIGATION CONTROLLER
+    // ============================================================================
+    function switchView(viewName) {
+      const wizardView = document.getElementById("wizardView");
+      const dashboardView = document.getElementById("dashboardView");
+      const controlCenterView = document.getElementById("controlCenterView");
+      const archiveView = document.getElementById("archiveView");
+
+      const btnDash = document.getElementById("navDashboardBtn");
+      const btnCC = document.getElementById("navControlCenterBtn");
+      const btnArc = document.getElementById("navArchiveBtn");
+      const btnWiz = document.getElementById("navWizardBtn");
+
+      wizardView.classList.add("hidden");
+      dashboardView.classList.add("hidden");
+      controlCenterView.classList.add("hidden");
+      archiveView.classList.add("hidden");
+
+      const inactiveClass = "px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700/70 transition flex items-center gap-1.5";
+      const activeClass = "px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 transition flex items-center gap-1.5";
+
+      btnDash.className = inactiveClass;
+      btnCC.className = inactiveClass;
+      btnArc.className = inactiveClass;
+      btnWiz.className = inactiveClass;
+
+      const mobDash = document.getElementById("mobNavDashboardBtn");
+      const mobCC = document.getElementById("mobNavControlCenterBtn");
+      const mobArc = document.getElementById("mobNavArchiveBtn");
+      const mobWiz = document.getElementById("mobNavWizardBtn");
+      const mobInactive = "flex flex-col items-center justify-center gap-0.5 text-slate-400 font-medium text-[11px] transition";
+      const mobActive = "flex flex-col items-center justify-center gap-0.5 text-indigo-400 font-bold text-[11px] transition";
+      if (mobDash) mobDash.className = viewName === "dashboard" ? mobActive : mobInactive;
+      if (mobCC) mobCC.className = viewName === "controlCenter" ? mobActive : mobInactive;
+      if (mobArc) mobArc.className = viewName === "archive" ? mobActive : mobInactive;
+      if (mobWiz) mobWiz.className = viewName === "wizard" ? mobActive : mobInactive;
+
+      if (viewName === "wizard") {
+        wizardView.classList.remove("hidden");
+        btnWiz.className = activeClass;
+        renderWizardAll();
+      } else if (viewName === "controlCenter") {
+        controlCenterView.classList.remove("hidden");
+        btnCC.className = activeClass;
+        renderControlCenter();
+      } else if (viewName === "archive") {
+        archiveView.classList.remove("hidden");
+        btnArc.className = activeClass;
+        renderArchiveView();
+      } else {
+        dashboardView.classList.remove("hidden");
+        btnDash.className = activeClass;
+        renderDashboard();
+      }
+    }
+
+    function updateNavPills() {
+      const stats = calculateSyllabusWorkloadStats(appState);
+      const activeCount =
+        stats.bucketCounts["Mock Priority"] +
+        stats.bucketCounts["Current"] +
+        stats.bucketCounts["Backlog"];
+      const completedCount = stats.bucketCounts["Completed"];
+
+      const activePill = document.getElementById("navActiveBucketsPill");
+      const compPill = document.getElementById("navCompletedCountPill");
+      if (activePill) activePill.textContent = `${activeCount} Active`;
+      if (compPill) compPill.textContent = String(completedCount);
+      const mobActivePill = document.getElementById("mobileActivePill");
+      const mobCompPill = document.getElementById("mobCompletedCountPill");
+      if (mobActivePill) mobActivePill.textContent = `${activeCount} Active`;
+      if (mobCompPill) mobCompPill.textContent = `(${completedCount})`;
+    }
+
+    // ============================================================================
+    // STEP 4: TOPIC CHECK-OFF & "ALL TOPICS FOR [CHAPTER] FINISHED! MOVE TO COMPLETED?"
+    // ============================================================================
+    function getChapterById(chapterId) {
+      return (appState.syllabus || neetSyllabus).find((c) => c.id === chapterId);
+    }
+
+    function promptMoveChapterToCompleted(chapterId) {
+      const ch = getChapterById(chapterId);
+      if (!ch) return;
+
+      openConfirmModal(
+        `All topics for ${ch.chapter} finished! Move to Completed?`,
+        `You've checked off every topic (One-Shot Lecture + ${ch.dpp_mcqs_per_topic} DPP MCQs per topic) in "${ch.chapter}". Move this chapter to your Completed Archive now?`,
+        "🎉 All Chapter Topics Completed!",
+        () => {
+          applyBucketStatusCommit(chapterId, "Completed", null);
+          closeConfirmModal();
+          renderDashboard();
+          showToast(`🏆 "${ch.chapter}" moved to Completed Archive!`, "success");
+        }
+      );
+    }
+
+    function applyBucketStatusCommit(chapterId, newBucketStatus, customOverrideDate = null) {
+      const ch = getChapterById(chapterId);
+      if (!ch) return;
+      const norm = normalizeBucketStatus(newBucketStatus);
+      ch.status = norm;
+
+      if (norm === "Mock Priority") {
+        if (customOverrideDate) {
+          appState.mockTestDates[chapterId] = customOverrideDate;
+          appState.mockDateOverridden[chapterId] = true;
+        } else if (!appState.mockTestDates[chapterId]) {
+          appState.mockTestDates[chapterId] = computeNextDefaultMockDate(
+            appState.mockCycleIntervalDays,
+            appState.mockCycleWeekday
+          );
+          appState.mockDateOverridden[chapterId] = false;
+        }
+      }
+
+      if (norm === "Completed") {
+        ch.topics.forEach((t) => {
+          t.completed = true;
+        });
+        appState.completedAtMap[chapterId] = new Date().toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        });
+      } else {
+        delete appState.completedAtMap[chapterId];
+      }
+
+      appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+      saveStateToStorage();
+      updateNavPills();
+    }
+
+    // ============================================================================
+    // 3-DAY FORECAST UI RENDERING (INDIVIDUAL TOPIC TASK CARDS)
+    // ============================================================================
+    function renderDashboardBucketSummary(stats) {
+      const bar = document.getElementById("dashboardBucketSummaryBar");
+      if (!bar) return;
+
+      const items = [
+        {
+          label: "1. 🚨 Mock Priority",
+          count: stats.bucketCounts["Mock Priority"],
+          cls: "border-rose-500/35 bg-rose-950/25 text-rose-300"
+        },
+        {
+          label: "2. 📘 Current Coaching",
+          count: stats.bucketCounts["Current"],
+          cls: "border-indigo-500/35 bg-indigo-950/25 text-indigo-300"
+        },
+        {
+          label: "3. 🛠️ Backlog (20%)",
+          count: stats.bucketCounts["Backlog"],
+          cls: "border-amber-500/35 bg-amber-950/25 text-amber-300"
+        },
+        {
+          label: "⏸️ Unstarted (Hidden)",
+          count: stats.bucketCounts["Unstarted"],
+          cls: "border-slate-800 bg-slate-950/70 text-slate-400"
+        },
+        {
+          label: "✅ Completed Archive",
+          count: stats.bucketCounts["Completed"],
+          cls: "border-emerald-500/35 bg-emerald-950/25 text-emerald-300"
+        }
+      ];
+
+      bar.innerHTML = items.map((item) => `
+        <div class="px-3.5 py-2.5 rounded-xl border ${item.cls} flex items-center justify-between">
+          <span class="text-xs font-semibold">${item.label}</span>
+          <span class="text-sm font-extrabold">${item.count}</span>
+        </div>
+      `).join("");
+    }
+
+    /**
+     * Renders an individual Topic Task Card strictly matching:
+     * Example UI Task Card: "Physics: Kinematics - Projectile Motion & Circular Motion Basics (90 mins)"
+     * Plus "+ 30 mins for 30 DPP MCQs = 120 mins total" and YouTube button querying:
+     * "Physics Wallah One Shot [Chapter Name] [Topic Name]"
+     */
+    function renderSingleTopicTaskCardHtml(taskItem) {
+      const ch = getChapterById(taskItem.chapterId);
+      const teacher = appState.selectedTeachers[taskItem.chapterId] || (SUBJECT_TEACHERS[taskItem.subject] || SUBJECT_TEACHERS.Physics)[0];
+      const mockDate = appState.mockTestDates[taskItem.chapterId] || null;
+      const savedCustomUrl = (appState.customVideoUrls && appState.customVideoUrls[taskItem.topicKey]) || "";
+      const defaultYtUrl = buildYouTubeTopicSearchUrl(taskItem.chapterName, taskItem.topicName);
+      const watchHref = savedCustomUrl.trim() ? savedCustomUrl.trim() : defaultYtUrl;
+
+      const totalTopicsInCh = ch ? ch.topics.length : 3;
+      const doneTopicsInCh = ch ? ch.topics.filter((t) => t.completed).length : 0;
+
+      const cardBorder = taskItem.completed
+        ? "border-emerald-500/50 bg-emerald-950/20"
+        : taskItem.statusBucket === "Mock Priority"
+        ? "border-rose-500/45 bg-slate-950/90 hover:border-rose-500/70"
+        : taskItem.statusBucket === "Backlog"
+        ? "border-amber-500/40 bg-slate-950/85 hover:border-amber-500/65"
+        : "border-slate-800 bg-slate-950/90 hover:border-slate-700";
+
+      const titleStrike = taskItem.completed ? "line-through text-slate-400" : "text-white";
+
+      return `
+        <div class="rounded-xl border ${cardBorder} p-3.5 space-y-3 transition shadow-sm">
+          <!-- Checkbox + Topic Headline: "[Subject]: [Chapter] - [Topic Name] ([duration_mins] mins)" -->
+          <div class="flex items-start justify-between gap-2.5">
+            <label class="flex items-start gap-2.5 cursor-pointer select-none flex-1 min-w-0">
+              <input
+                type="checkbox"
+                data-topic-check="${taskItem.topicKey}"
+                data-topic-ch-id="${taskItem.chapterId}"
+                data-topic-idx="${taskItem.topicIndex}"
+                ${taskItem.completed ? "checked" : ""}
+                class="mt-1 w-4 h-4 rounded border-slate-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0"
+              />
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  ${getSubjectBadgeHtml(taskItem.subject)}
+                  ${getBucketBadgeHtml(taskItem.statusBucket, taskItem.statusBucket === "Mock Priority" ? mockDate : null)}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-indigo-300 border border-slate-700">${teacher}</span>
+                  ${taskItem.rescheduledCount > 0 ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Shifted +${taskItem.rescheduledCount}d</span>` : ""}
+                </div>
+                <h5 class="text-xs sm:text-sm font-bold ${titleStrike} leading-snug">
+                  ${taskItem.subject}: ${taskItem.chapterName} - ${taskItem.topicName} (${taskItem.lectureMins} mins)
+                </h5>
+                <p class="text-[11px] text-slate-400">
+                  One-Shot Segment: <strong class="text-slate-200">${taskItem.lectureMins}m</strong> + Solve <strong class="text-emerald-300">${taskItem.dppMcqCount} DPP MCQs (${taskItem.dppMins}m)</strong> • Topic ${taskItem.topicIndex + 1}/${totalTopicsInCh} (${doneTopicsInCh}/${totalTopicsInCh} done)
+                </p>
+              </div>
+            </label>
+
+            <div class="text-right shrink-0">
+              <span class="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-extrabold bg-slate-900 text-indigo-300 border border-slate-800">
+                ${taskItem.totalTopicMins} mins
+              </span>
+              <div class="text-[10px] font-semibold text-emerald-400 mt-0.5">+${taskItem.dppMcqCount} MCQs</div>
+            </div>
+          </div>
+
+          <!-- Action Footer: Watch Lecture (YouTube Topic Auto-Search) + Bucket Switcher -->
+          <div class="pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+            <a
+              href="${watchHref}"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Search YouTube: Physics Wallah One Shot ${taskItem.chapterName} ${taskItem.topicName}"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-600/20 transition"
+            >
+              <span>&#9654; Watch Lecture</span>
+              <span class="text-[10px] opacity-85 font-normal">(PW Topic One-Shot)</span>
+            </a>
+
+            <select
+              data-card-bucket-select="${taskItem.chapterId}"
+              title="Change Chapter Bucket Status"
+              class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-indigo-500"
+            >
+              ${BUCKET_STATUSES.map((b) => `<option value="${b}" ${b === taskItem.statusBucket ? "selected" : ""}>${b}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderForecastDayColumnHtml(dayObj) {
+      const allDayTasks = [...dayObj.primaryTopicTasks, ...dayObj.backlogTopicTasks];
+      const dayPyqs = allDayTasks.reduce((s, t) => s + (Number(t.dppMcqCount) || 0), 0);
+
+      const formattedDate = new Date(dayObj.dateStr + "T00:00:00").toLocaleDateString("en-IN", {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+
+      const headerAccent = dayObj.dayIndex === 0
+        ? "from-indigo-950/90 via-slate-900 to-slate-900 border-indigo-500/40"
+        : dayObj.dayIndex === 1
+        ? "from-purple-950/75 via-slate-900 to-slate-900 border-purple-500/35"
+        : "from-slate-900 via-slate-900 to-slate-950 border-slate-800";
+
+      const primaryHtml = dayObj.primaryTopicTasks.length === 0
+        ? `<div class="p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-400">No Primary Target topics scheduled for ${dayObj.title}.</div>`
+        : dayObj.primaryTopicTasks.map((t) => renderSingleTopicTaskCardHtml(t)).join("");
+
+      const backlogHtml = dayObj.backlogTopicTasks.length === 0
+        ? `<div class="p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-400">No Backlog topics scheduled for ${dayObj.title}.</div>`
+        : dayObj.backlogTopicTasks.map((t) => renderSingleTopicTaskCardHtml(t)).join("");
+
+      return `
+        <div class="bg-slate-900/90 border ${dayObj.dayIndex === 0 ? "border-indigo-500/45" : "border-slate-800"} rounded-2xl overflow-hidden shadow-xl flex flex-col">
+          <!-- Day Column Header -->
+          <div class="p-4 bg-gradient-to-r ${headerAccent} border-b border-slate-800 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold ${dayObj.dayIndex === 0 ? "bg-indigo-500 text-white" : "bg-slate-800 text-slate-200"}">
+                  ${dayObj.title}
+                </span>
+                <span class="text-xs font-semibold text-slate-300">${formattedDate}</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                ${dayObj.usedTotalMins}m / ${dayObj.dailyCapMins}m (${formatHoursDecimal(dayObj.usedTotalMins)})
+              </span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400">
+              <span>Primary: <strong class="text-rose-300">${dayObj.usedPrimaryMins}m</strong> • Backlog: <strong class="text-amber-300">${dayObj.usedBacklogMins}m</strong></span>
+              <span class="text-indigo-300 font-semibold">${allDayTasks.length} Topics • ${dayPyqs} DPP MCQs</span>
+            </div>
+          </div>
+
+          <!-- Day Column Body: Split into Section 1 (Primary) & Section 2 (Backlog) -->
+          <div class="p-4 space-y-5 flex-1">
+            <!-- Section 1: 🔥 Primary Targets (Current & Mock) -->
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-rose-950/35 border border-rose-500/30">
+                <span class="text-xs font-extrabold text-rose-200">🔥 Primary Targets (Current &amp; Mock)</span>
+                <span class="text-[11px] font-bold text-rose-300">${dayObj.usedPrimaryMins} mins (${formatHoursDecimal(dayObj.usedPrimaryMins)})</span>
+              </div>
+              <div class="space-y-3">
+                ${primaryHtml}
+              </div>
+            </div>
+
+            <!-- Section 2: 🛠️ Backlog Clearance (20% of time) -->
+            <div class="space-y-2.5 pt-2 border-t border-slate-800/80">
+              <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-amber-950/35 border border-amber-500/30">
+                <span class="text-xs font-extrabold text-amber-200">🛠️ Backlog Clearance (20% of time)</span>
+                <span class="text-[11px] font-bold text-amber-300">${dayObj.usedBacklogMins} mins (${formatHoursDecimal(dayObj.usedBacklogMins)})</span>
+              </div>
+              <div class="space-y-3">
+                ${backlogHtml}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDashboard() {
+      appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+      const todayObj = appState.forecastDays[0];
+      const tomorrowObj = appState.forecastDays[1];
+      const day3Obj = appState.forecastDays[2];
+
+      const now = new Date();
+      document.getElementById("currentDateBadge").textContent = now.toLocaleDateString("en-IN", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+
+      const stats = calculateSyllabusWorkloadStats(appState);
+      updateNavPills();
+      renderDashboardBucketSummary(stats);
+
+      const mc = stats.mockCycleInfo || getEffectiveMockCycleConfig(appState);
+      document.getElementById("nextMockCycleBadge").textContent = mc.mode === "postponed"
+        ? `📅 ${mc.label}`
+        : `🚨 Mock Cycle: ${mc.label} • Next: ${mc.nextMockDate}`;
+      document.getElementById("prepStartBadge").textContent = `Prep Start: ${appState.prepStartDate} (Day ${stats.prepDayNumber})`;
+
+      const activeChapterCount =
+        stats.bucketCounts["Mock Priority"] +
+        stats.bucketCounts["Current"] +
+        stats.bucketCounts["Backlog"];
+      const callout = document.getElementById("noActiveChaptersCallout");
+      if (activeChapterCount === 0) {
+        callout.classList.remove("hidden");
+      } else {
+        callout.classList.add("hidden");
+      }
+
+      // Today's Tasks & Progress Metrics
+      const todayAllTasks = [...todayObj.primaryTopicTasks, ...todayObj.backlogTopicTasks];
+      const totalScheduledMins = todayObj.usedTotalMins;
+      const completedScheduledMins = todayAllTasks
+        .filter((t) => t.completed)
+        .reduce((s, t) => s + (Number(t.totalTopicMins) || 0), 0);
+
+      const totalTargetedMcqs = todayAllTasks.reduce((s, t) => s + (Number(t.dppMcqCount) || 0), 0);
+      const completedMcqsToday = todayAllTasks
+        .filter((t) => t.completed)
+        .reduce((s, t) => s + (Number(t.dppMcqCount) || 0), 0);
+
+      const pendingTodayCount = todayAllTasks.filter((t) => !t.completed).length;
+
+      const progressPct = totalScheduledMins > 0
+        ? Math.min(100, Math.round((completedScheduledMins / totalScheduledMins) * 100))
+        : 0;
+
+      // Update Card 1: Daily Capacity
+      const capMins = stats.dailyCapMins;
+      const overloadBoosts = Math.floor((capMins - 360) / 30);
+      document.getElementById("overloadLevelBadge").textContent = overloadBoosts > 0
+        ? `Level +${overloadBoosts} (+${overloadBoosts * 30}m Boost)`
+        : "Base 6.0h Limit";
+      document.getElementById("dailyCapacityValue").textContent = `${formatMinutesToHrMin(capMins)} (${capMins}m)`;
+      document.getElementById("capacityUsedSub").textContent = `Today: ${totalScheduledMins}m / ${capMins}m max`;
+      document.getElementById("forecastHeaderCapLabel").textContent = `${capMins} mins (${formatHoursDecimal(capMins)})`;
+      document.getElementById("heroLimitText").textContent = `${capMins} mins (${formatHoursDecimal(capMins)})`;
+
+      // Update Card 2: Consistency Streak
+      const streak = parseInt(appState.consistencyStreak, 10) || 0;
+      const daysUntilBoost = 3 - (streak % 3);
+      document.getElementById("consistencyStreakValue").textContent = `🔥 ${streak} ${streak === 1 ? "Day" : "Days"}`;
+      document.getElementById("nextOverloadSub").textContent = capMins >= 720
+        ? "Max 12-Hour Daily Capacity Reached!"
+        : `${daysUntilBoost} more 100% ${daysUntilBoost === 1 ? "day" : "days"} to unlock ${formatHoursDecimal(capMins + 30)}`;
+
+      // Update Card 3: Today's DPP MCQ Target
+      document.getElementById("todayMcqTargetValue").textContent = `${totalTargetedMcqs} MCQs`;
+      document.getElementById("todayMcqCompletedSub").textContent = `${completedMcqsToday} / ${totalTargetedMcqs} DPP MCQs solved today`;
+
+      // Update Card 4: 3-Day Horizon & Archive
+      const overflowCount = appState.forecastDays.overflowTaskCount || 0;
+      document.getElementById("deferredQueuePill").textContent = `Day 4+ Queue: ${overflowCount} topics`;
+      document.getElementById("overallSyllabusValue").textContent = `${stats.bucketCounts["Completed"]} / ${(appState.syllabus || neetSyllabus).length} Completed`;
+      document.getElementById("threeDaySummarySub").textContent = `Today: ${todayObj.usedTotalMins}m • Tom: ${tomorrowObj.usedTotalMins}m • Day 3: ${day3Obj.usedTotalMins}m`;
+
+      // Update Master Progress Bar
+      document.getElementById("liveProgressLabel").textContent = `${progressPct}% (${completedScheduledMins} / ${totalScheduledMins} mins • ${completedMcqsToday} / ${totalTargetedMcqs} DPP MCQs completed)`;
+      document.getElementById("liveProgressBar").style.width = `${progressPct}%`;
+      document.getElementById("pendingCountPill").textContent = String(pendingTodayCount);
+
+      // Reschedule banner
+      const banner = document.getElementById("rescheduleBanner");
+      if (appState.lastRescheduleReport) {
+        banner.classList.remove("hidden");
+        document.getElementById("rescheduleBannerText").textContent = appState.lastRescheduleReport;
+      } else {
+        banner.classList.add("hidden");
+      }
+
+      // Render 3-Day Forecast Grid (Columns vs Focused Day Tabs)
+      const grid = document.getElementById("threeDayForecastGrid");
+      const tabsBar = document.getElementById("forecastDayTabsBar");
+      const btnCols = document.getElementById("viewModeColumnsBtn");
+      const btnTabs = document.getElementById("viewModeTabsBtn");
+
+      if (appState.forecastViewMode === "tabs") {
+        tabsBar.classList.remove("hidden");
+        tabsBar.classList.add("flex");
+        grid.className = "grid grid-cols-1 gap-5 items-start";
+        btnTabs.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition";
+        btnCols.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition";
+
+        const activeDayIdx = appState.activeForecastDayTab || 0;
+        grid.innerHTML = renderForecastDayColumnHtml(appState.forecastDays[activeDayIdx]);
+      } else {
+        tabsBar.classList.add("hidden");
+        tabsBar.classList.remove("flex");
+        grid.className = "grid grid-cols-1 xl:grid-cols-3 gap-5 items-start";
+        btnCols.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition";
+        btnTabs.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition";
+
+        grid.innerHTML = appState.forecastDays.map((d) => renderForecastDayColumnHtml(d)).join("");
+      }
+
+      renderDashboardCompletedArchivePreview();
+      attachDashboardTaskListeners();
+    }
+
+    function renderDashboardCompletedArchivePreview() {
+      const container = document.getElementById("dashboardCompletedArchiveList");
+      if (!container) return;
+      const completedChapters = (appState.syllabus || neetSyllabus).filter(
+        (ch) => normalizeBucketStatus(ch.status) === "Completed"
+      );
+
+      if (completedChapters.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-6 px-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-400">
+            No chapters completed yet. Check off all topics for an active chapter to trigger the completion prompt and archive it here!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = completedChapters.map((ch) => {
+        const completedDate = appState.completedAtMap[ch.id] || "Completed";
+        return `
+          <div class="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/35 flex items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-1.5">
+                ${getSubjectBadgeHtml(ch.subject)}
+                <span class="text-[11px] font-bold text-emerald-300">✓ ${completedDate}</span>
+              </div>
+              <div class="text-xs sm:text-sm font-bold text-white mt-1">${ch.chapter}</div>
+            </div>
+            <button
+              type="button"
+              data-reopen-completed="${ch.id}"
+              title="Move back to Current"
+              class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition shrink-0"
+            >
+              Reopen
+            </button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function attachDashboardTaskListeners() {
+      // Topic Checkboxes: updates `completed: true` for that specific topic in `appState.syllabus` in localStorage,
+      // and once all topics in that chapter have `completed: true`, prompts: "All topics for [Chapter Name] finished! Move to Completed?"
+      document.querySelectorAll("[data-topic-check]").forEach((checkbox) => {
+        checkbox.addEventListener("change", (e) => {
+          const topicKey = e.target.getAttribute("data-topic-check");
+          const chId = e.target.getAttribute("data-topic-ch-id");
+          const topicIdx = parseInt(e.target.getAttribute("data-topic-idx"), 10);
+          const isChecked = e.target.checked;
+
+          const ch = getChapterById(chId);
+          if (!ch || !ch.topics[topicIdx]) return;
+
+          ch.topics[topicIdx].completed = isChecked;
+
+          if (isChecked) {
+            appState.completedTodayTopicKeys[topicKey] = true;
+            delete appState.pushedToTomorrowTopicKeys[topicKey];
+          } else {
+            delete appState.completedTodayTopicKeys[topicKey];
+          }
+
+          saveStateToStorage();
+          renderDashboard();
+
+          // Check if 100% of Today's scheduled topics are now completed
+          const todayObj = appState.forecastDays[0];
+          const todayAll = [...todayObj.primaryTopicTasks, ...todayObj.backlogTopicTasks];
+          if (isChecked && todayAll.length > 0 && todayAll.every((t) => t.completed)) {
+            recordDailyStreakCompletion("auto");
+          }
+
+          // Check if ALL topics in this chapter now have `completed: true`
+          if (isChecked && ch.topics.every((t) => t.completed)) {
+            promptMoveChapterToCompleted(chId);
+          }
+        });
+      });
+
+      // Instant Bucket Dropdown on Topic Cards
+      document.querySelectorAll("[data-card-bucket-select]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const chId = e.target.getAttribute("data-card-bucket-select");
+          const newBucket = e.target.value;
+          applyBucketStatusCommit(chId, newBucket, null);
+          renderDashboard();
+          if (newBucket === "Mock Priority") {
+            showToast(`Auto-assigned Default Mock Test Date (${appState.mockTestDates[chId]}). Override anytime in Syllabus Control Center!`, "warning");
+          } else {
+            showToast(`Moved chapter to "${newBucket}" and rebuilt 3-Day Forecast!`, "info");
+          }
+        });
+      });
+
+      // Reopen completed chapter from dashboard archive preview
+      document.querySelectorAll("[data-reopen-completed]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const chId = e.currentTarget.getAttribute("data-reopen-completed");
+          const ch = getChapterById(chId);
+          if (ch) {
+            ch.topics.forEach((t) => { t.completed = false; });
+          }
+          applyBucketStatusCommit(chId, "Current", null);
+          renderDashboard();
+          showToast("Reopened chapter into 'Current' bucket!", "info");
+        });
+      });
+    }
+
+    // ============================================================================
+    // SYLLABUS CONTROL CENTER (GROUPED BY SUBJECT + TOPIC CHECKBOXES + OVERRIDE DATE)
+    // ============================================================================
+    function renderControlCenter() {
+      const container = document.getElementById("controlCenterSubjectsContainer");
+      const searchVal = (document.getElementById("ccSearchInput").value || "").trim().toLowerCase();
+      const bucketFilter = document.getElementById("ccBucketFilter").value || "ALL";
+
+      const stats = calculateSyllabusWorkloadStats(appState);
+      updateNavPills();
+
+      const mc = stats.mockCycleInfo || getEffectiveMockCycleConfig(appState);
+      const ccLabel = document.getElementById("ccDefaultCycleLabel");
+      if (ccLabel) {
+        ccLabel.textContent = `${mc.label} (${mc.nextMockDate})`;
+      }
+
+      const badgesEl = document.getElementById("ccBucketCountBadges");
+      if (badgesEl) {
+        badgesEl.innerHTML = `
+          <span class="px-2.5 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 font-semibold">
+            🚨 Mock Priority: ${stats.bucketCounts["Mock Priority"]}
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-semibold">
+            📘 Current: ${stats.bucketCounts["Current"]}
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold">
+            🛠️ Backlog: ${stats.bucketCounts["Backlog"]}
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-semibold">
+            ⏸️ Unstarted: ${stats.bucketCounts["Unstarted"]}
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">
+            ✅ Completed: ${stats.bucketCounts["Completed"]}
+          </span>
+        `;
+      }
+
+      const subjectsMeta = [
+        { key: "Physics", title: "Physics (19 NMC Chapters)", accent: "border-sky-500/30 from-sky-950/50" },
+        { key: "Chemistry", title: "Chemistry (20 NMC Chapters)", accent: "border-amber-500/30 from-amber-950/50" },
+        { key: "Botany", title: "Botany (17 NMC Chapters)", accent: "border-emerald-500/30 from-emerald-950/50" },
+        { key: "Zoology", title: "Zoology (15 NMC Chapters)", accent: "border-pink-500/30 from-pink-950/50" }
+      ];
+
+      container.innerHTML = subjectsMeta.map((subj) => {
+        const subjectChapters = (appState.syllabus || neetSyllabus).filter((ch) => {
+          if (ch.subject !== subj.key) return false;
+          const st = normalizeBucketStatus(ch.status);
+          if (bucketFilter !== "ALL" && st !== bucketFilter) return false;
+          const teacher = (appState.selectedTeachers[ch.id] || "").toLowerCase();
+          const topicsJoined = (ch.topics || []).map((t) => t.name).join(" ").toLowerCase();
+          if (
+            searchVal &&
+            !ch.chapter.toLowerCase().includes(searchVal) &&
+            !teacher.includes(searchVal) &&
+            !topicsJoined.includes(searchVal)
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        if (subjectChapters.length === 0) {
+          return `
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
+              <h3 class="text-sm font-bold text-slate-400">${subj.title} — No chapters matching filter</h3>
+            </div>
+          `;
+        }
+
+        const rowsHtml = subjectChapters.map((ch, idx) => {
+          const st = normalizeBucketStatus(ch.status);
+          const teacherPool = SUBJECT_TEACHERS[ch.subject] || SUBJECT_TEACHERS.Physics;
+          const teacher = appState.selectedTeachers[ch.id] || teacherPool[0];
+          const mockDate = appState.mockTestDates[ch.id] || stats.nextDefaultMockDate;
+          const isOverridden = !!appState.mockDateOverridden[ch.id];
+
+          const topicCheckboxesHtml = (ch.topics || []).map((t, tIdx) => `
+            <label class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-950 border ${t.completed ? "border-emerald-500/35 text-emerald-300" : "border-slate-800 text-slate-200"} text-xs cursor-pointer">
+              <div class="flex items-center gap-2 min-w-0">
+                <input
+                  type="checkbox"
+                  data-cc-topic-toggle="${ch.id}"
+                  data-cc-topic-idx="${tIdx}"
+                  ${t.completed ? "checked" : ""}
+                  class="w-3.5 h-3.5 rounded border-slate-600 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0"
+                />
+                <span class="truncate ${t.completed ? "line-through text-slate-400" : ""}">${t.name}</span>
+              </div>
+              <span class="text-[11px] font-semibold text-indigo-300 shrink-0">${t.duration_mins}m + 30m DPP</span>
+            </label>
+          `).join("");
+
+          return `
+            <div class="p-4 rounded-xl bg-slate-900/90 border ${st === "Mock Priority" ? "border-rose-500/45" : st === "Current" ? "border-indigo-500/45" : st === "Backlog" ? "border-amber-500/40" : st === "Completed" ? "border-emerald-500/40" : "border-slate-800"} flex flex-col justify-between gap-3 hover:border-slate-700 transition">
+              <div class="space-y-2.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-400">#${idx + 1}</span>
+                    <h4 class="text-sm font-bold text-white">${ch.chapter}</h4>
+                  </div>
+                  ${getBucketBadgeHtml(st, st === "Mock Priority" ? mockDate : null)}
+                </div>
+
+                <div class="text-[11px] text-slate-400">
+                  ${ch.topics.length} Topics • <strong class="text-emerald-300">${ch.dpp_mcqs_per_topic} DPP MCQs per topic</strong> (+30 mins DPP per topic)
+                </div>
+
+                <!-- Individual Topic List inside Control Center -->
+                <div class="space-y-1.5">
+                  ${topicCheckboxesHtml}
+                </div>
+              </div>
+
+              <!-- Controls Row: Teacher + 5-Bucket Dropdown + Inline Mock Override Date Calendar Picker -->
+              <div class="pt-3 border-t border-slate-800/80 space-y-2.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <select
+                    data-cc-teacher-select="${ch.id}"
+                    title="Assign Teacher"
+                    class="px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-indigo-300 font-semibold focus:outline-none focus:border-indigo-500"
+                  >
+                    ${teacherPool.map((t) => `<option value="${t}" ${t === teacher ? "selected" : ""}>${t}</option>`).join("")}
+                  </select>
+
+                  <select
+                    data-cc-bucket-select="${ch.id}"
+                    title="Change 5-Bucket Status"
+                    class="px-3 py-1.5 rounded-xl bg-slate-950 border border-indigo-500/40 text-xs font-bold text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  >
+                    ${BUCKET_STATUSES.map((b) => `<option value="${b}" ${b === st ? "selected" : ""}>${b}</option>`).join("")}
+                  </select>
+                </div>
+
+                ${st === "Mock Priority" ? `
+                  <div class="p-2.5 rounded-xl bg-rose-950/35 border border-rose-500/35 flex flex-wrap items-center justify-between gap-2">
+                    <div class="text-[11px] text-rose-200">
+                      <span class="font-bold">${isOverridden ? "📅 Custom Override Date:" : "🔄 Auto 14-Day Cycle Deadline:"}</span>
+                      <span class="text-rose-300 ml-1">${mockDate} (${calculateDaysBetween(null, mockDate)}d left)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-300">Override Date:</label>
+                      <input
+                        type="date"
+                        data-cc-override-date="${ch.id}"
+                        value="${mockDate}"
+                        class="px-2 py-1 rounded-lg bg-slate-950 border border-rose-500/40 text-xs text-white focus:outline-none focus:border-rose-400"
+                      />
+                    </div>
+                  </div>
+                ` : ""}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="bg-slate-950/70 border ${subj.accent} rounded-2xl overflow-hidden shadow-lg">
+            <div class="px-5 py-3.5 bg-gradient-to-r ${subj.accent} to-slate-950 border-b border-slate-800 flex items-center justify-between">
+              <h3 class="text-base font-extrabold text-white">${subj.title}</h3>
+              <span class="text-xs text-slate-400">${subjectChapters.length} chapters shown</span>
+            </div>
+            <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+              ${rowsHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Listeners for topic checkboxes inside Control Center
+      container.querySelectorAll("[data-cc-topic-toggle]").forEach((cb) => {
+        cb.addEventListener("change", (e) => {
+          const chId = e.target.getAttribute("data-cc-topic-toggle");
+          const tIdx = parseInt(e.target.getAttribute("data-cc-topic-idx"), 10);
+          const ch = getChapterById(chId);
+          if (!ch || !ch.topics[tIdx]) return;
+          ch.topics[tIdx].completed = e.target.checked;
+          appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+          saveStateToStorage();
+          renderControlCenter();
+          if (e.target.checked && ch.topics.every((t) => t.completed)) {
+            promptMoveChapterToCompleted(chId);
+          }
+        });
+      });
+
+      // Listeners for instant bucket status changes
+      container.querySelectorAll("[data-cc-bucket-select]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const chId = e.target.getAttribute("data-cc-bucket-select");
+          const newStatus = e.target.value;
+          const ch = getChapterById(chId);
+          applyBucketStatusCommit(chId, newStatus, null);
+          renderControlCenter();
+          if (newStatus === "Mock Priority") {
+            showToast(
+              `🚨 Auto-assigned "${ch ? ch.chapter : chId}" to next Default Mock Date (${appState.mockTestDates[chId]}).`,
+              "warning"
+            );
+          } else {
+            showToast(`Updated "${ch ? ch.chapter : chId}" to ${newStatus}! 3-Day Forecast recalculated.`, "success");
+          }
+        });
+      });
+
+      // Listeners for Override Date calendar pickers
+      container.querySelectorAll("[data-cc-override-date]").forEach((dateInput) => {
+        dateInput.addEventListener("change", (e) => {
+          const chId = e.target.getAttribute("data-cc-override-date");
+          const newDateVal = e.target.value;
+          if (!newDateVal) return;
+          const ch = getChapterById(chId);
+          applyBucketStatusCommit(chId, "Mock Priority", newDateVal);
+          renderControlCenter();
+          showToast(`📅 Overrode Mock Date for "${ch ? ch.chapter : chId}" to ${newDateVal}!`, "success");
+        });
+      });
+
+      // Listeners for per-chapter teacher change
+      container.querySelectorAll("[data-cc-teacher-select]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const chId = e.target.getAttribute("data-cc-teacher-select");
+          appState.selectedTeachers[chId] = e.target.value;
+          saveStateToStorage();
+          showToast(`Assigned ${e.target.value}!`, "info");
+        });
+      });
+    }
+
+    // ============================================================================
+    // COMPLETED CHAPTERS ARCHIVE FULL TAB VIEW
+    // ============================================================================
+    function renderArchiveView() {
+      const grid = document.getElementById("fullArchiveGrid");
+      const badge = document.getElementById("archiveTotalMasteredBadge");
+      const syllabusList = appState.syllabus || neetSyllabus;
+      const completedChapters = syllabusList.filter(
+        (ch) => normalizeBucketStatus(ch.status) === "Completed"
+      );
+
+      const pct = Math.round((completedChapters.length / syllabusList.length) * 100);
+      if (badge) {
+        badge.textContent = `${completedChapters.length} / ${syllabusList.length} Chapters Mastered (${pct}%)`;
+      }
+
+      if (completedChapters.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 px-4 rounded-2xl border border-dashed border-slate-800 text-center space-y-3">
+            <div class="text-base font-bold text-white">Your Completed Archive is Empty</div>
+            <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+              Check off all topics for an active chapter on your 3-Day Forecast to trigger the completion prompt and archive it here.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = completedChapters.map((ch) => {
+        const teacher = appState.selectedTeachers[ch.id] || (SUBJECT_TEACHERS[ch.subject] || SUBJECT_TEACHERS.Physics)[0];
+        const completedDate = appState.completedAtMap[ch.id] || "Completed";
+        return `
+          <div class="p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/15 flex flex-col justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                ${getSubjectBadgeHtml(ch.subject)}
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  ✅ ${completedDate}
+                </span>
+              </div>
+              <h4 class="text-base font-bold text-white">${ch.chapter}</h4>
+              <p class="text-xs text-slate-400">Mastered all ${ch.topics.length} topics with <strong class="text-indigo-300">${teacher}</strong></p>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/80">
+              <button
+                type="button"
+                data-archive-reopen="${ch.id}"
+                class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              >
+                Move Back to Current
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      grid.querySelectorAll("[data-archive-reopen]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const chId = e.currentTarget.getAttribute("data-archive-reopen");
+          const ch = getChapterById(chId);
+          if (ch) {
+            ch.topics.forEach((t) => { t.completed = false; });
+          }
+          applyBucketStatusCommit(chId, "Current", null);
+          renderArchiveView();
+          showToast("Moved chapter back to 'Current' bucket.", "info");
+        });
+      });
+    }
+
+    // ============================================================================
+    // SETTINGS, MOCK CYCLE & PACING VIEW
+    // ============================================================================
+    function renderSubjectDefaultTeachers() {
+      const container = document.getElementById("subjectDefaultTeachersContainer");
+      if (!container) return;
+      const subjects = [
+        { key: "Physics", label: "Physics (19 Ch)" },
+        { key: "Chemistry", label: "Chemistry (20 Ch)" },
+        { key: "Botany", label: "Botany (17 Ch)" },
+        { key: "Zoology", label: "Zoology (15 Ch)" }
+      ];
+
+      container.innerHTML = subjects.map((subj) => {
+        const sampleCh = (appState.syllabus || neetSyllabus).find((c) => c.subject === subj.key);
+        const pool = SUBJECT_TEACHERS[subj.key] || SUBJECT_TEACHERS.Physics;
+        const currentTeacher = (sampleCh && appState.selectedTeachers[sampleCh.id]) || pool[0];
+        const options = pool
+          .map((t) => `<option value="${t}" ${t === currentTeacher ? "selected" : ""}>${t}</option>`)
+          .join("");
+
+        return `
+          <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-xs font-bold text-slate-200">${subj.label}</span>
+            <select data-subj-default-teacher="${subj.key}" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-semibold text-indigo-300 focus:outline-none focus:border-indigo-500">
+              ${options}
+            </select>
+          </div>
+        `;
+      }).join("");
+
+      container.querySelectorAll("[data-subj-default-teacher]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const subjKey = e.target.getAttribute("data-subj-default-teacher");
+          const chosenTeacher = e.target.value;
+          (appState.syllabus || neetSyllabus).forEach((ch) => {
+            if (ch.subject === subjKey) {
+              appState.selectedTeachers[ch.id] = chosenTeacher;
+            }
+          });
+          saveStateToStorage();
+          showToast(`Assigned ${chosenTeacher} to all ${subjKey} chapters!`, "success");
+        });
+      });
+    }
+
+    function updateWizardMathPreview() {
+      const intervalEl = document.getElementById("mockCycleIntervalInput");
+      const weekdayEl = document.getElementById("mockCycleWeekdaySelect");
+      const overrideEl = document.getElementById("globalMockOverrideDateInput");
+      const autoSprintEl = document.getElementById("autoSprint1DayGapCheckbox");
+      const sprintDateEl = document.getElementById("sprintStartDateInput");
+      const prepStartInput = document.getElementById("prepStartDateInput");
+      const targetInput = document.getElementById("targetDateInput");
+
+      const previewInfo = getEffectiveMockCycleConfig({
+        mockCycleIntervalDays: parseInt(intervalEl.value, 10) || 14,
+        mockCycleWeekday: weekdayEl.value,
+        globalMockOverrideDate: overrideEl ? overrideEl.value : "",
+        autoSprint1DayGapEnabled: autoSprintEl ? autoSprintEl.checked : true,
+        sprintStartDate: sprintDateEl ? sprintDateEl.value : appState.sprintStartDate
+      });
+      const nextMock = `${previewInfo.nextMockDate} (${previewInfo.label})`;
+      const prepDay = calculatePrepDayNumber(prepStartInput.value || appState.prepStartDate);
+      const daysAvail = calculateDaysBetween(null, targetInput.value || appState.targetDate);
+      const capMins = appState.daily_study_limit || 360;
+
+      document.getElementById("wizNextMockDatePreview").textContent = nextMock;
+      document.getElementById("wizPrepDayCount").textContent = String(prepDay);
+      document.getElementById("wizDaysAvailableDisplay").textContent = `${daysAvail} days to target`;
+      document.getElementById("wizPreviewAdaptiveCap").textContent = `${formatHoursDecimal(capMins)} (${capMins} mins)`;
+      document.getElementById("wizPreviewStreak").textContent = `${appState.consistencyStreak || 0} Days (+30m every 3 days)`;
+    }
+
+    function renderWizardAll() {
+      document.getElementById("mockCycleIntervalInput").value = String(appState.mockCycleIntervalDays || 14);
+      document.getElementById("mockCycleWeekdaySelect").value = String(appState.mockCycleWeekday !== undefined ? appState.mockCycleWeekday : "0");
+      document.getElementById("globalMockOverrideDateInput").value = appState.globalMockOverrideDate || "";
+      document.getElementById("autoSprint1DayGapCheckbox").checked = appState.autoSprint1DayGapEnabled !== false;
+      document.getElementById("sprintStartDateInput").value = appState.sprintStartDate || getDateOffsetStr(105);
+      document.getElementById("prepStartDateInput").value = appState.prepStartDate || getDateOffsetStr(0);
+      document.getElementById("targetDateInput").value = appState.targetDate || getDateOffsetStr(95);
+      document.getElementById("lectureSpeedSelect").value = String(appState.lectureSpeed || 1.0);
+      document.getElementById("dppTimePerTopicInput").value = appState.dppEstimatedMinsPerTopic || 30;
+
+      renderSubjectDefaultTeachers();
+      updateWizardMathPreview();
+    }
+
+    // ============================================================================
+    // DYNAMIC RESCHEDULING ("MOVE PENDING TO TOMORROW" WITH 6H CAPACITY CASCADE)
+    // ============================================================================
+    function triggerAutoRescheduler() {
+      const todayObj = appState.forecastDays[0];
+      const todayAllTasks = [...todayObj.primaryTopicTasks, ...todayObj.backlogTopicTasks];
+      const pendingToday = todayAllTasks.filter((t) => !t.completed);
+
+      if (pendingToday.length === 0) {
+        showToast("All scheduled topics for Today are completed! Logging your 100% streak day.", "success");
+        recordDailyStreakCompletion("manual");
+        return;
+      }
+
+      const pendingMins = pendingToday.reduce((s, t) => s + (Number(t.totalTopicMins) || 0), 0);
+
+      pendingToday.forEach((t) => {
+        appState.pushedToTomorrowTopicKeys[t.topicKey] = true;
+        appState.rescheduledTopicCounts[t.topicKey] = (appState.rescheduledTopicCounts[t.topicKey] || 0) + 1;
+      });
+
+      appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+      const tomorrowAfter = appState.forecastDays[1];
+      const day3After = appState.forecastDays[2];
+      const capMins = appState.daily_study_limit || 360;
+
+      appState.lastRescheduleReport = `Pushed ${pendingToday.length} unfinished topic(s) (${pendingMins} mins total) from Today into Tomorrow. Tomorrow strictly respects your ${capMins} mins (${formatHoursDecimal(capMins)}) limit (${tomorrowAfter.usedTotalMins}m / ${capMins}m used), cascading overflow topics into Day 3 (${day3After.usedTotalMins}m / ${capMins}m used).`;
+
+      saveStateToStorage();
+      renderDashboard();
+      showToast(`Pushed ${pendingToday.length} pending topics to Tomorrow & cascaded overflow to Day 3!`, "warning");
+    }
+
+    // ============================================================================
+    // TOP-LEVEL EVENT LISTENERS INITIALIZATION
+    // ============================================================================
+    function initAppListeners() {
+      // Desktop & Mobile Navigation Bars
+      document.getElementById("navDashboardBtn").addEventListener("click", () => switchView("dashboard"));
+      document.getElementById("navControlCenterBtn").addEventListener("click", () => switchView("controlCenter"));
+      document.getElementById("navArchiveBtn").addEventListener("click", () => switchView("archive"));
+      document.getElementById("navWizardBtn").addEventListener("click", () => switchView("wizard"));
+
+      document.getElementById("mobNavDashboardBtn").addEventListener("click", () => switchView("dashboard"));
+      document.getElementById("mobNavControlCenterBtn").addEventListener("click", () => switchView("controlCenter"));
+      document.getElementById("mobNavArchiveBtn").addEventListener("click", () => switchView("archive"));
+      document.getElementById("mobNavWizardBtn").addEventListener("click", () => switchView("wizard"));
+
+      // Backup Export & Import
+      document.getElementById("exportBackupBtn").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `neet360_backup_${getDateOffsetStr(0)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("Downloaded JSON backup of your NEET 360 progress!", "success");
+      });
+
+      document.getElementById("importBackupInput").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            appState = hydrateStateObject(parsed);
+            saveStateToStorage();
+            renderWizardAll();
+            renderDashboard();
+            showToast("Restored all progress from backup file!", "success");
+          } catch (err) {
+            showToast("Invalid backup JSON file.", "warning");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      });
+
+      // Quick links to Control Center & Archive
+      document.getElementById("quickOpenControlCenterBtn").addEventListener("click", () => switchView("controlCenter"));
+      document.getElementById("calloutOpenControlCenterBtn").addEventListener("click", () => switchView("controlCenter"));
+      document.getElementById("goToControlCenterFromWizBtn").addEventListener("click", () => switchView("controlCenter"));
+      document.getElementById("ccReturnToDashboardBtn").addEventListener("click", () => switchView("dashboard"));
+      document.getElementById("openFullArchiveBtn").addEventListener("click", () => switchView("archive"));
+
+      // 3-Day Forecast View Mode Switcher (3-Column Grid vs Focused Day Tabs)
+      document.getElementById("viewModeColumnsBtn").addEventListener("click", () => {
+        appState.forecastViewMode = "columns";
+        saveStateToStorage();
+        renderDashboard();
+      });
+
+      document.getElementById("viewModeTabsBtn").addEventListener("click", () => {
+        appState.forecastViewMode = "tabs";
+        saveStateToStorage();
+        renderDashboard();
+      });
+
+      document.querySelectorAll(".forecast-day-tab-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const dayIdx = parseInt(e.currentTarget.getAttribute("data-day-tab"), 10) || 0;
+          appState.activeForecastDayTab = dayIdx;
+          document.querySelectorAll(".forecast-day-tab-btn").forEach((b) => {
+            b.className = "forecast-day-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+          });
+          e.currentTarget.className = "forecast-day-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 text-white transition";
+          saveStateToStorage();
+          renderDashboard();
+        });
+      });
+
+      // Log 100% Today Streak button
+      document.getElementById("logStreakDayBtn").addEventListener("click", () => {
+        const todayObj = appState.forecastDays[0];
+        const todayTasks = [...todayObj.primaryTopicTasks, ...todayObj.backlogTopicTasks];
+        todayTasks.forEach((t) => {
+          const ch = getChapterById(t.chapterId);
+          if (ch && ch.topics[t.topicIndex]) {
+            ch.topics[t.topicIndex].completed = true;
+            appState.completedTodayTopicKeys[t.topicKey] = true;
+          }
+        });
+        recordDailyStreakCompletion("manual");
+      });
+
+      // Load NMC Coaching Sample (Activates Kinematics, Laws of Motion, Some Basic Concepts, GOC, Cell, Breathing across Mock Priority, Current, and Backlog)
+      document.getElementById("loadStarterSampleBtn").addEventListener("click", () => {
+        const defaultMockDate = computeNextDefaultMockDate(appState.mockCycleIntervalDays, appState.mockCycleWeekday);
+        const setChStatus = (id, st) => {
+          const ch = getChapterById(id);
+          if (ch) {
+            ch.status = st;
+            if (st === "Mock Priority") {
+              appState.mockTestDates[id] = defaultMockDate;
+            }
+          }
+        };
+
+        setChStatus("phy_02", "Mock Priority"); // Kinematics (3 topics: 60m, 75m, 90m + 30m DPP each)
+        setChStatus("chem_01", "Current");      // Some Basic Concepts of Chemistry
+        setChStatus("bot_06", "Current");       // Cell: The Unit of Life
+        setChStatus("zoo_04", "Current");       // Breathing and Exchange of Gases
+        setChStatus("phy_03", "Backlog");       // Laws of Motion
+        setChStatus("chem_14", "Backlog");      // Some Basic Principles of Organic Chemistry (GOC)
+
+        appState.pushedToTomorrowTopicKeys = {};
+        appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+        saveStateToStorage();
+        renderDashboard();
+        showToast(`Loaded NMC Coaching Sample! Topics assembled up to 360 mins (6h) on Today, cascading into Tomorrow & Day 3.`, "success");
+      });
+
+      // Set all 68 chapters back to Unstarted inside Control Center
+      document.getElementById("ccResetAllToUnstartedBtn").addEventListener("click", () => {
+        (appState.syllabus || neetSyllabus).forEach((ch) => {
+          ch.status = "Unstarted";
+          ch.topics.forEach((t) => { t.completed = false; });
+        });
+        appState.mockTestDates = {};
+        appState.mockDateOverridden = {};
+        appState.completedAtMap = {};
+        appState.pushedToTomorrowTopicKeys = {};
+        appState.rescheduledTopicCounts = {};
+        appState.completedTodayTopicKeys = {};
+        appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+        saveStateToStorage();
+        renderControlCenter();
+        showToast("All 71 chapters set to Unstarted (Default).", "info");
+      });
+
+      // Reset All Tracker Data
+      document.getElementById("resetAllBtn").addEventListener("click", () => {
+        openConfirmModal(
+          "Reset NEET 360 Tracker?",
+          "This will reset your Daily Capacity back to 6 Hours (360 mins), clear your Consistency Streak, and set all 71 NMC chapters back to 'Unstarted' in localStorage.",
+          "Reset Confirmation",
+          () => {
+            try {
+              localStorage.removeItem(STORAGE_KEY);
+              LEGACY_KEYS.forEach((k) => localStorage.removeItem(k));
+            } catch (e) {}
+            clearIndexedDB();
+            appState = createInitialState();
+            saveStateToStorage();
+            closeConfirmModal();
+            switchView("dashboard");
+            showToast("Tracker reset: 6h base capacity & all 71 chapters Unstarted.", "info");
+          }
+        );
+      });
+
+      document.getElementById("confirmCancelBtn").addEventListener("click", closeConfirmModal);
+      document.getElementById("confirmAcceptBtn").addEventListener("click", () => {
+        if (typeof pendingConfirmCallback === "function") {
+          pendingConfirmCallback();
+        }
+      });
+
+      // Live Math Preview Listeners in Settings
+      document.getElementById("clearGlobalMockOverrideBtn").addEventListener("click", () => {
+        document.getElementById("globalMockOverrideDateInput").value = "";
+        appState.globalMockOverrideDate = "";
+        updateWizardMathPreview();
+        showToast("Cleared occasion override; back to regular mock cycle.", "info");
+      });
+
+      document.getElementById("mockCycleIntervalInput").addEventListener("change", (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (val <= 3) {
+          document.getElementById("mockCycleWeekdaySelect").value = "any";
+        }
+      });
+
+      [
+        "mockCycleIntervalInput",
+        "mockCycleWeekdaySelect",
+        "globalMockOverrideDateInput",
+        "autoSprint1DayGapCheckbox",
+        "sprintStartDateInput",
+        "prepStartDateInput",
+        "targetDateInput",
+        "lectureSpeedSelect",
+        "dppTimePerTopicInput"
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("input", updateWizardMathPreview);
+          el.addEventListener("change", updateWizardMathPreview);
+        }
+      });
+
+      // Save Settings, Default Mock Cycle & Pacing
+      document.getElementById("saveOnboardingBtn").addEventListener("click", () => {
+        const cycleDays = parseInt(document.getElementById("mockCycleIntervalInput").value, 10) || 14;
+        const cycleDowRaw = document.getElementById("mockCycleWeekdaySelect").value;
+        const globalOverride = document.getElementById("globalMockOverrideDateInput").value || "";
+        const autoSprintEnabled = document.getElementById("autoSprint1DayGapCheckbox").checked;
+        const sprintDate = document.getElementById("sprintStartDateInput").value || getDateOffsetStr(105);
+        const pStart = document.getElementById("prepStartDateInput").value || getDateOffsetStr(0);
+        const tDate = document.getElementById("targetDateInput").value || getDateOffsetStr(95);
+        const speed = parseFloat(document.getElementById("lectureSpeedSelect").value) || 1.0;
+        const dppMins = Math.max(15, parseInt(document.getElementById("dppTimePerTopicInput").value, 10) || 30);
+
+        appState.mockCycleIntervalDays = cycleDays;
+        appState.mockCycleWeekday = cycleDays <= 3 ? "any" : cycleDowRaw;
+        appState.globalMockOverrideDate = globalOverride;
+        appState.autoSprint1DayGapEnabled = autoSprintEnabled;
+        appState.sprintStartDate = sprintDate;
+        appState.prepStartDate = pStart;
+        appState.targetDate = tDate;
+        appState.lectureSpeed = speed;
+        appState.dppEstimatedMinsPerTopic = dppMins;
+
+        const nextDefaultMock = getEffectiveMockCycleConfig(appState).nextMockDate;
+        (appState.syllabus || neetSyllabus).forEach((ch) => {
+          if (normalizeBucketStatus(ch.status) === "Mock Priority" && !appState.mockDateOverridden[ch.id]) {
+            appState.mockTestDates[ch.id] = nextDefaultMock;
+          }
+        });
+
+        appState.forecastDays = buildTopicWiseThreeDayForecast(appState);
+        saveStateToStorage();
+        switchView("dashboard");
+        showToast("Saved Default Mock Cycle & Topic Assembly Settings! Rebuilt 3-Day Forecast.", "success");
+      });
+
+      // Dashboard Actions
+      document.getElementById("movePendingBtn").addEventListener("click", triggerAutoRescheduler);
+
+      document.getElementById("dismissRescheduleBannerBtn").addEventListener("click", () => {
+        appState.lastRescheduleReport = null;
+        saveStateToStorage();
+        renderDashboard();
+      });
+
+      // Control Center Search & Filter
+      document.getElementById("ccSearchInput").addEventListener("input", renderControlCenter);
+      document.getElementById("ccBucketFilter").addEventListener("change", renderControlCenter);
+    }
+
+    // Boot Application on DOM Ready (with IndexedDB fallback restore if localStorage was evicted)
+    window.addEventListener("DOMContentLoaded", async () => {
+      loadStateFromStorage();
+      const hasAnyProgress = (appState.syllabus || []).some((ch) => ch.status !== "Unstarted" || ch.topics.some((t) => t.completed));
+      if (!hasAnyProgress) {
+        const idbState = await loadFromIndexedDB();
+        if (idbState && Array.isArray(idbState.syllabus)) {
+          const idbHasProgress = idbState.syllabus.some((ch) => ch.status !== "Unstarted" || (ch.topics && ch.topics.some((t) => t.completed)));
+          if (idbHasProgress || (idbState.consistencyStreak || 0) > 0) {
+            appState = hydrateStateObject(idbState);
+            saveStateToStorage();
+            showToast("Restored your saved study progress from device memory!", "success");
+          }
+        }
+      }
+      initAppListeners();
+      renderWizardAll();
+      switchView("dashboard");
+    });
+  </script>
+</body>
+</html>
